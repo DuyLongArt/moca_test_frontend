@@ -1,6 +1,0 @@
-build/
-bin/
-.gradle/
-.env
-.env.*
-!.env.example

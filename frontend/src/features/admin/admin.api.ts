@@ -1,7 +1,7 @@
 import { api } from '../../shared/lib/axios'
-import { useMockApi } from '../../shared/lib/useMockApi'
+import { isMockApi } from '../../shared/lib/mockApi'
 
-const USE_MOCK = useMockApi()
+const USE_MOCK = isMockApi()
 
 export type AdminStats = {
   doctorCount: number

@@ -1,6 +1,6 @@
 import { api } from '../../shared/lib/axios'
 import { getDevUser } from '../../shared/lib/devFixtures'
-import { useMockApi } from '../../shared/lib/useMockApi'
+import { isMockApi } from '../../shared/lib/mockApi'
 import type { AuthUser, UserRole } from '../../stores/authStore'
 
 export type AuthUserDto = {
@@ -43,7 +43,7 @@ function mapLogin(data: LoginResponse): { user: AuthUser; accessToken: string } 
 export async function patientLogin(
   phone: string,
 ): Promise<{ user: AuthUser; accessToken: string }> {
-  if (useMockApi()) {
+  if (isMockApi()) {
     return { accessToken: 'dev-bypass', user: { ...getDevUser('PATIENT'), phoneNumber: phone } }
   }
   const { data } = await api.post<LoginResponse>('/api/v1/auth/patient/login', {
@@ -57,7 +57,7 @@ export async function doctorLogin(
   email: string,
   password: string,
 ): Promise<{ user: AuthUser; accessToken: string }> {
-  if (useMockApi()) {
+  if (isMockApi()) {
     const role: UserRole = email.includes('admin') ? 'ADMIN' : 'DOCTOR'
     return { accessToken: 'dev-bypass', user: { ...getDevUser(role), email } }
   }
@@ -68,6 +68,16 @@ export async function doctorLogin(
   return mapLogin(data)
 }
 
+export async function requestPasswordReset(email: string): Promise<void> {
+  if (isMockApi()) return
+  await api.post('/api/v1/auth/forgot-password', { email })
+}
+
+export async function resetPassword(token: string, password: string): Promise<void> {
+  if (isMockApi()) return
+  await api.post('/api/v1/auth/reset-password', { token, password })
+}
+
 /** Doctor signup — creates account + returns JWT. */
 export async function doctorSignup(payload: {
   email: string
@@ -76,7 +86,7 @@ export async function doctorSignup(payload: {
   specialty?: string
   licenseNumber?: string
 }): Promise<{ user: AuthUser; accessToken: string }> {
-  if (useMockApi()) {
+  if (isMockApi()) {
     return {
       accessToken: 'dev-bypass',
       user: { ...getDevUser('DOCTOR'), email: payload.email, fullName: payload.fullName },

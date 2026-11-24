@@ -1,24 +1,24 @@
-# 1 build jar → 2 slim JRE runtime
-FROM eclipse-temurin:21-jdk-alpine AS build
+# syntax=docker/dockerfile:1
+
+FROM golang:1.24-alpine AS build
+
+# Set destination for COPY
 WORKDIR /app
 
-COPY gradlew settings.gradle build.gradle ./
-COPY gradle gradle
-RUN chmod +x gradlew
+# Download any Go modules
+COPY container_src/go.mod ./
+RUN go mod download
 
-COPY src src
-RUN ./gradlew bootJar -x test --no-daemon
+# Copy container source code
+COPY container_src/ ./
 
-FROM eclipse-temurin:21-jre-alpine
-WORKDIR /app
+# Build
+RUN CGO_ENABLED=0 GOOS=linux go build -o /server
 
-RUN apk add --no-cache curl
-
-COPY --from=build /app/build/libs/*.jar app.jar
-
+FROM scratch
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=build /server /server
 EXPOSE 8080
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
-  CMD curl -sf http://localhost:8080/api/v1/health || exit 1
-
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Run
+CMD ["/server"]

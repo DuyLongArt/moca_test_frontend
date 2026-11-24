@@ -81,6 +81,12 @@ export function LoginPage() {
           </div>
         </div>
 
+        <div className="text-right">
+          <Link to="/forgot-password" className="text-sm font-medium text-primary hover:underline">
+            Quên mật khẩu?
+          </Link>
+        </div>
+
         {error && (
           <p className="text-sm text-error" role="alert">
             {error}

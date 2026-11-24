@@ -1,6 +1,6 @@
 import { api } from '../../shared/lib/axios'
 import { getDevUser } from '../../shared/lib/devFixtures'
-import { useMockApi } from '../../shared/lib/useMockApi'
+import { isMockApi } from '../../shared/lib/mockApi'
 import { mapAuthUserDto } from '../auth/auth.api'
 import type { AuthUser } from '../../stores/authStore'
 import type {
@@ -10,7 +10,7 @@ import type {
 } from '../../shared/types/session'
 
 
-const USE_MOCK = useMockApi()
+const USE_MOCK = isMockApi()
 
 const MOCK_SESSIONS: TestSessionSummary[] = [
   {
