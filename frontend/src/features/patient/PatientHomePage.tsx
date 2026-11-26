@@ -1,5 +1,5 @@
 import { Brain, CalendarDays, ClipboardList, UserRound } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { MocaPatientLayout } from '../../shared/components/layout/MocaPatientLayout'
 import { useHealth } from '../../shared/hooks/useHealth'
 
@@ -35,7 +35,6 @@ const MENU = [
 ]
 
 export function PatientHomePage() {
-  const navigate = useNavigate()
   const showDevHealth = import.meta.env.DEV
   const { data: health, isError } = useHealth({ enabled: showDevHealth })
 
@@ -60,10 +59,9 @@ export function PatientHomePage() {
 
       <div className="mt-4 grid grid-cols-2 gap-3">
         {MENU.map((item) => (
-          <button
+          <Link
             key={item.to}
-            type="button"
-            onClick={() => navigate(item.to)}
+            to={item.to}
             className="group flex flex-col items-start gap-2 rounded-xl border border-outline-variant bg-surface-container-lowest p-3 text-left transition-all hover:border-primary/40 active:scale-[0.98] sm:flex-row sm:gap-3 sm:p-4"
           >
             <div
@@ -79,7 +77,7 @@ export function PatientHomePage() {
                 {item.desc}
               </p>
             </div>
-          </button>
+          </Link>
         ))}
       </div>
     </MocaPatientLayout>

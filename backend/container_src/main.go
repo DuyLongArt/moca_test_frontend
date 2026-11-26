@@ -64,7 +64,7 @@ func main() {
 
 	errInitDb := app.InitDB()
 	if errInitDb != nil {
-		log.Fatalf("can not open a db %v", errOpenDb)
+		log.Fatalf("can not initialize db %v", errInitDb)
 	}
 	server := &http.Server{
 		Addr:    ":8080",

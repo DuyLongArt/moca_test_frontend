@@ -1,7 +1,7 @@
 # Frontend architecture — React Query + Zustand
 
 **Stack:** React 19 · Vite · TypeScript · TanStack Query · Zustand · axios  
-**Backend:** Spring Boot `http://localhost:8080` (proxy `/api` in dev)
+**Backend:** Cloudflare Worker `mocatestdeploy` with Go Containers (proxy `/api` in dev)
 
 ---
 
@@ -15,7 +15,7 @@
 ├─────────────────────────────────────────────────────────────────┤
 │  LINK — *.api.ts (axios) + shared/types + queryKeys              │
 ├─────────────────────────────────────────────────────────────────┤
-│  DATA — PostgreSQL via Spring (users, test_sessions, …)          │
+│  DATA — Cloudflare D1 via Worker (users, test_sessions, …)      │
 └─────────────────────────────────────────────────────────────────┘
          ▲ JWT from authStore (Zustand persist)
 ```

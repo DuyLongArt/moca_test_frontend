@@ -189,7 +189,7 @@ export function LandingPage() {
           className="flex flex-col items-center justify-center rounded-xl bg-primary/10 px-4 py-1.5 text-primary"
         >
           <Home size={22} />
-          <span className="text-xs font-medium">Home</span>
+          <span className="text-xs font-medium">Trang chủ</span>
         </button>
         <button
           type="button"
@@ -197,7 +197,7 @@ export function LandingPage() {
           className="flex flex-col items-center justify-center rounded-xl px-4 py-1.5 text-on-surface-variant"
         >
           <ClipboardList size={22} />
-          <span className="text-xs">Assess</span>
+          <span className="text-xs">Bác sĩ</span>
         </button>
         <button
           type="button"
@@ -205,7 +205,7 @@ export function LandingPage() {
           className="flex flex-col items-center justify-center rounded-xl px-4 py-1.5 text-on-surface-variant"
         >
           <BarChart3 size={22} />
-          <span className="text-xs">Reports</span>
+          <span className="text-xs">Kết quả</span>
         </button>
         <button
           type="button"
@@ -213,7 +213,7 @@ export function LandingPage() {
           className="flex flex-col items-center justify-center rounded-xl px-4 py-1.5 text-on-surface-variant"
         >
           <UserRound size={22} />
-          <span className="text-xs">Profile</span>
+          <span className="text-xs">Hồ sơ</span>
         </button>
       </nav>
 

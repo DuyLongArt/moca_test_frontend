@@ -24,7 +24,7 @@ Open http://localhost:5173 — chọn vai trò trên màn đăng nhập demo.
 
 ## API proxy
 
-Vite proxies `/api` → `http://localhost:8080` (Spring Boot).
+Vite proxies `/api` → the deployed Worker (`https://mocatestdeploy.duylongart.workers.dev` by default). Set `VITE_PROXY_TARGET=http://localhost:8787` to use a local `wrangler dev` server.
 
 Copy `.env.example` → `.env` if needed.
 

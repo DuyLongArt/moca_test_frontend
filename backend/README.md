@@ -14,7 +14,7 @@ The template uses the `durable_object` scheduling policy. Each Durable Object se
 
 ## Get started
 
-Install Node.js and start a Docker-compatible engine before running this template locally. The template pins Wrangler 4.136.1; local development with the `durable_object` policy requires Wrangler 4.136.0 or later.
+Install Node.js and start a Docker-compatible engine before running this template locally. This project uses Wrangler `^4.149.0` from `package.json`; local development with the `durable_object` policy requires Wrangler 4.136.0 or later.
 
 Create a project with [C3](https://developers.cloudflare.com/workers/get-started/guide/):
 

@@ -125,8 +125,11 @@ export class MyContainer extends DurableObject<Env> {
 		const port = container.getTcpPort(PORT);
 		const deadline = Date.now() + 30_000;
 		while (Date.now() < deadline) {
-			const response = await port.fetch(`http://container${READY_PATH}`);
-			if (response.ok) return;
+			try {
+				const response = await port.fetch(`http://container${READY_PATH}`);
+				await response.body?.cancel();
+				if (response.ok) return;
+			} catch {}
 			await new Promise((resolve) => setTimeout(resolve, 200));
 		}
 		throw new Error("MoCA container did not become ready on port 8080");
