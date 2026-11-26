@@ -20,7 +20,7 @@ export function EmptyTestsState() {
       <div className="mb-4 flex h-24 w-24 items-center justify-center rounded-xl border border-outline-variant bg-surface-container-lowest">
         <span className="text-4xl">🧪</span>
       </div>
-      <h2 className="text-lg font-semibold text-on-surface">Chưa có bài test</h2>
+      <h2 className="text-lg font-semibold text-on-surface">Chưa có bài kiểm tra</h2>
       <p className="mt-1 max-w-xs text-sm text-on-surface-variant">
         Làm bài MoCA để xem kết quả tại đây.
       </p>

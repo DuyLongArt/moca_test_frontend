@@ -58,22 +58,26 @@ export function PatientHomePage() {
         )}
       </section>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+      <div className="mt-4 grid grid-cols-2 gap-3">
         {MENU.map((item) => (
           <button
             key={item.to}
             type="button"
             onClick={() => navigate(item.to)}
-            className="group flex items-start gap-3 rounded-xl border border-outline-variant bg-surface-container-lowest p-4 text-left transition-all hover:border-primary/40 active:scale-[0.98]"
+            className="group flex flex-col items-start gap-2 rounded-xl border border-outline-variant bg-surface-container-lowest p-3 text-left transition-all hover:border-primary/40 active:scale-[0.98] sm:flex-row sm:gap-3 sm:p-4"
           >
             <div
-              className={`flex h-15 w-15 shrink-0 items-center justify-center rounded-lg ${item.color}`}
+              className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg ${item.color} sm:h-15 sm:w-15`}
             >
               <item.icon size={20} />
             </div>
             <div>
-              <h3 className="text-base font-semibold text-on-surface">{item.label}</h3>
-              <p className="mt-0.5 text-xs text-on-surface-variant">{item.desc}</p>
+              <h3 className="text-sm font-semibold text-on-surface sm:text-base">
+                {item.label}
+              </h3>
+              <p className="mt-0.5 text-[11px] text-on-surface-variant sm:text-xs">
+                {item.desc}
+              </p>
             </div>
           </button>
         ))}

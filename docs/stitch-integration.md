@@ -81,6 +81,6 @@ Port layout to LoginPage.tsx — keep useAuthStore, match stitch-tokens.
 
 ## Tokens
 
-`frontend/src/styles/stitch-tokens.css` — CSS variables from Stitch **Functional Clarity** (primary `#4f46e5`, Geist).
+`frontend/src/styles/stitch-tokens.css` — CSS variables from Stitch **Functional Clarity** (primary `#2563eb`, Geist).
 
 Do not copy Stitch HTML wholesale into React — extract layout + tokens; keep Query/Zustand logic.

@@ -18,7 +18,10 @@ export function MocaBottomNav() {
   }
 
   return (
-    <nav className="fixed bottom-0 z-50 flex w-full shrink-0 items-center justify-around border-t border-outline-variant bg-surface px-2 py-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom,0px))] md:hidden">
+    <nav
+      aria-label="Điều hướng chính"
+      className="fixed bottom-0 z-50 flex w-full shrink-0 items-center justify-around border-t border-outline-variant bg-surface px-2 py-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom,0px))] md:hidden"
+    >
       {NAV.map((item) => {
         const Icon = item.icon
         return (

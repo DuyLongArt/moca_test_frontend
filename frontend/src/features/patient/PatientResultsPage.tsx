@@ -39,6 +39,7 @@ export function PatientResultsPage() {
           <button
             key={f.id}
             type="button"
+            aria-pressed={filter === f.id}
             onClick={() => setFilter(f.id)}
             className={[
               'rounded-full px-3 py-1 text-sm font-medium transition',
@@ -66,6 +67,7 @@ export function PatientResultsPage() {
                   <button
                     key={s.id}
                     type="button"
+                    aria-pressed={s.id === activeSession.id}
                     onClick={() => setSelectedId(s.id)}
                     className={[
                       'shrink-0 rounded-lg border px-3 py-1.5 text-left text-xs transition',
