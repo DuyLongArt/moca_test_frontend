@@ -37,9 +37,16 @@ func newRouter(app *infas.DB_connection) http.Handler {
 	router.HandleFunc("/", handler)
 	router.HandleFunc("/container", handler)
 	router.HandleFunc("/api/v1/auth/patient/login", usecase.PatientHandler(app))
+	router.HandleFunc("/api/v1/auth/patient/status", usecase.PatientAuthStatusHandler(app))
+	router.HandleFunc("/api/v1/auth/patient/signup", usecase.PatientSignupHandler(app))
 	router.HandleFunc("/api/v1/auth/doctor/login", usecase.DoctorHandler(app))
+	router.HandleFunc("/api/v1/auth/doctor/signup", usecase.DoctorSignupHandler(app))
 	router.HandleFunc("/api/v1/auth/reset-password", usecase.ResetPasswordHandler(app))
 	router.HandleFunc("/internal/password-reset/request", usecase.ForgotPasswordHandler(app))
+	router.HandleFunc("/api/v1/doctor/list", usecase.DoctorPatientListHandler(app))
+	router.HandleFunc("/api/v1/doctors/list", usecase.DoctorsListHandler(app))
+	router.HandleFunc("/api/v1/test/grade", usecase.GradeTestHandler(app))
+	router.HandleFunc("/api/v1/test/update", usecase.UpdatePatientScoreHandler(app))
 	router.HandleFunc("/error", errorHandler)
 
 	return router

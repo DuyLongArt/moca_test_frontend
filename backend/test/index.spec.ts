@@ -73,9 +73,59 @@ function createContainer(running = false) {
 	};
 }
 
+function createD1Env() {
+	const statement = {
+		bind: vi.fn(() => statement),
+		run: vi.fn(async () => ({ success: true, meta: { changes: 1, last_row_id: 7 } })),
+		raw: vi.fn(async () => [["id", "email"], [7, "doctor@example.com"]]),
+	};
+	const db = {
+		prepare: vi.fn(() => statement),
+		batch: vi.fn(async (statements: unknown[]) =>
+			statements.map(() => ({ success: true, meta: { changes: 1 } })),
+		),
+	};
+	const env = {
+		...createEnv().env,
+		moca_db_lite: db,
+		D1_PROXY_TOKEN: "d1-secret",
+	} as unknown as Env;
+	return { env, db, statement };
+}
+
 afterEach(() => vi.restoreAllMocks());
 
 describe("Worker routes", () => {
+	it("rejects unauthenticated D1 proxy requests", async () => {
+		const { env } = createD1Env();
+		const response = await worker.request("http://example.com/internal/d1/query", {
+			method: "POST",
+			headers: { "content-type": "application/json" },
+			body: JSON.stringify({ sql: "SELECT 1" }),
+		}, env);
+		expect(response.status).toBe(401);
+	});
+
+	it("executes D1 queries through the binding", async () => {
+		const { env, db, statement } = createD1Env();
+		const response = await worker.request("http://example.com/internal/d1/query", {
+			method: "POST",
+			headers: {
+				"content-type": "application/json",
+				"x-d1-proxy-token": "d1-secret",
+			},
+			body: JSON.stringify({ sql: "SELECT id, email FROM doctors WHERE id = ?", params: [7], raw: true }),
+		}, env);
+		expect(response.status).toBe(200);
+		await expect(response.json()).resolves.toMatchObject({
+			success: true,
+			columns: ["id", "email"],
+		});
+		expect(db.prepare).toHaveBeenCalledWith("SELECT id, email FROM doctors WHERE id = ?");
+		expect(statement.bind).toHaveBeenCalledWith(7);
+		expect(statement.raw).toHaveBeenCalledWith({ columnNames: true });
+	});
+
 	it("sends all paths to the shared moca container", async () => {
 		const { env, getByName } = createEnv();
 		await worker.request("http://example.com/", undefined, env);
@@ -118,7 +168,10 @@ describe("Worker routes", () => {
 		expect(new URL(internalRequest.url).pathname).toBe(
 			"/internal/password-reset/request",
 		);
-		expect(await internalRequest.json()).toEqual({ email: "doctor@example.com" });
+		expect(await internalRequest.json()).toEqual({
+			email: "doctor@example.com",
+			role: "doctor",
+		});
 
 		expect(sendEmail).toHaveBeenCalledWith(
 			expect.objectContaining({
@@ -130,6 +183,37 @@ describe("Worker routes", () => {
 		expect(message.text).toContain(
 			"http://example.com/reset-password?token=reset-token",
 		);
+	});
+
+	it("keeps the patient role in the reset link", async () => {
+		const { env, fetch, sendEmail } = createEnv();
+		fetch.mockResolvedValue(
+			new Response(
+				JSON.stringify({
+					status: "OK",
+					data: { token: "patient-token", role: "patient" },
+				}),
+				{ headers: { "content-type": "application/json" } },
+			),
+		);
+		const response = await worker.request(
+			"http://example.com/api/v1/auth/forgot-password",
+			{
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ email: "patient@example.com", role: "patient" }),
+			},
+			env,
+		);
+		expect(response.status).toBe(200);
+
+		const internalRequest = fetch.mock.calls[0][0] as Request;
+		expect(await internalRequest.json()).toEqual({
+			email: "patient@example.com",
+			role: "patient",
+		});
+		const message = sendEmail.mock.calls[0][0] as { text: string };
+		expect(message.text).toContain("role=patient");
 	});
 
 	it("does not send email when the doctor is not found", async () => {

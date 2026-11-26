@@ -15,19 +15,48 @@ import (
 
 const passwordResetTTL = 30 * time.Minute
 
-func (app *DB_connection) CreatePasswordResetToken(ctx context.Context, email string) (string, bool, error) {
-	var doctorID int64
+const (
+	passwordResetDoctor  = "doctor"
+	passwordResetPatient = "patient"
+)
+
+func normalizePasswordResetRole(role string) string {
+	if role == passwordResetPatient {
+		return passwordResetPatient
+	}
+	return passwordResetDoctor
+}
+
+func passwordResetSubjectTable(role string) string {
+	if role == passwordResetPatient {
+		return "patients"
+	}
+	return "doctors"
+}
+
+func findPasswordResetSubject(ctx context.Context, db *sql.DB, email, role string) (int64, string, error) {
+	var id int64
 	var storedEmail string
-	err := app.DB.QueryRowContext(
-		ctx,
-		"SELECT id, email FROM doctor WHERE lower(email) = ? LIMIT 1",
-		email,
-	).Scan(&doctorID, &storedEmail)
+	query := "SELECT id, email FROM doctors WHERE lower(email) = ? LIMIT 1"
+	if role == passwordResetPatient {
+		query = "SELECT id, COALESCE(email, '') FROM patients WHERE lower(COALESCE(email, '')) = ? LIMIT 1"
+	}
+	err := db.QueryRowContext(ctx, query, email).Scan(&id, &storedEmail)
+	return id, storedEmail, err
+}
+
+func (app *DB_connection) CreatePasswordResetToken(ctx context.Context, email string) (string, bool, error) {
+	return app.CreatePasswordResetTokenForRole(ctx, email, passwordResetDoctor)
+}
+
+func (app *DB_connection) CreatePasswordResetTokenForRole(ctx context.Context, email, role string) (string, bool, error) {
+	role = normalizePasswordResetRole(role)
+	subjectID, storedEmail, err := findPasswordResetSubject(ctx, app.DB, email, role)
 	if errors.Is(err, sql.ErrNoRows) {
 		return "", false, nil
 	}
 	if err != nil {
-		return "", false, fmt.Errorf("find doctor for password reset: %w", err)
+		return "", false, fmt.Errorf("find %s for password reset: %w", role, err)
 	}
 
 	raw := make([]byte, 32)
@@ -43,16 +72,22 @@ func (app *DB_connection) CreatePasswordResetToken(ctx context.Context, email st
 	}
 	defer tx.Rollback()
 
-	if _, err := tx.ExecContext(ctx, "DELETE FROM password_reset_token WHERE doctor_id = ?", doctorID); err != nil {
+	if _, err := tx.ExecContext(
+		ctx,
+		"DELETE FROM password_reset_token WHERE role = ? AND doctor_id = ?",
+		role,
+		subjectID,
+	); err != nil {
 		return "", false, fmt.Errorf("clear old password reset tokens: %w", err)
 	}
 	_, err = tx.ExecContext(
 		ctx,
-		"INSERT INTO password_reset_token (doctor_id, email, token_hash, expires_at) VALUES (?, ?, ?, ?)",
-		doctorID,
+		"INSERT INTO password_reset_token (doctor_id, email, token_hash, expires_at, role) VALUES (?, ?, ?, ?, ?)",
+		subjectID,
 		storedEmail,
 		digest[:],
 		time.Now().Add(passwordResetTTL).Unix(),
+		role,
 	)
 	if err != nil {
 		return "", false, fmt.Errorf("store password reset token: %w", err)
@@ -65,18 +100,24 @@ func (app *DB_connection) CreatePasswordResetToken(ctx context.Context, email st
 }
 
 func (app *DB_connection) ResetDoctorPassword(ctx context.Context, token, newPassword string) (bool, error) {
+	return app.ResetPasswordForRole(ctx, token, newPassword, passwordResetDoctor)
+}
+
+func (app *DB_connection) ResetPasswordForRole(ctx context.Context, token, newPassword, role string) (bool, error) {
+	role = normalizePasswordResetRole(role)
 	digest := sha256.Sum256([]byte(token))
 
 	var tokenID int64
-	var doctorID int64
+	var subjectID int64
 	err := app.DB.QueryRowContext(
 		ctx,
 		`SELECT id, doctor_id FROM password_reset_token
-		 WHERE token_hash = ? AND used_at IS NULL AND expires_at > ?
+		 WHERE token_hash = ? AND role = ? AND used_at IS NULL AND expires_at > ?
 		 LIMIT 1`,
 		digest[:],
+		role,
 		time.Now().Unix(),
-	).Scan(&tokenID, &doctorID)
+	).Scan(&tokenID, &subjectID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return false, nil
 	}
@@ -89,6 +130,7 @@ func (app *DB_connection) ResetDoctorPassword(ctx context.Context, token, newPas
 		return false, fmt.Errorf("hash new password: %w", err)
 	}
 
+	table := passwordResetSubjectTable(role)
 	tx, err := app.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return false, fmt.Errorf("start password reset transaction: %w", err)
@@ -97,16 +139,16 @@ func (app *DB_connection) ResetDoctorPassword(ctx context.Context, token, newPas
 
 	result, err := tx.ExecContext(
 		ctx,
-		"UPDATE doctor SET password_hash = ? WHERE id = ?",
+		fmt.Sprintf("UPDATE %s SET password_hash = ? WHERE id = ?", table),
 		string(hash),
-		doctorID,
+		subjectID,
 	)
 	if err != nil {
-		return false, fmt.Errorf("update doctor password: %w", err)
+		return false, fmt.Errorf("update %s password: %w", role, err)
 	}
 	affected, err := result.RowsAffected()
 	if err != nil {
-		return false, fmt.Errorf("check doctor password update: %w", err)
+		return false, fmt.Errorf("check %s password update: %w", role, err)
 	}
 	if affected == 0 {
 		return false, nil

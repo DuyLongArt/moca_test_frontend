@@ -4,6 +4,7 @@ import {
   doctorLogin as doctorLoginApi,
   doctorSignup as doctorSignupApi,
   patientLogin as patientLoginApi,
+  patientSignup as patientSignupApi,
 } from '../features/auth/auth.api'
 
 export type UserRole = 'PATIENT' | 'DOCTOR' | 'ADMIN'
@@ -22,11 +23,17 @@ export type AuthUser = {
 type AuthState = {
   user: AuthUser | null
   token: string | null
-  /** Patient: phone only → POST /api/v1/auth/patient/login */
-  patientLogin: (phone: string) => Promise<void>
-  /** Clinician / admin: email + password → POST /api/v1/auth/staff/login */
+  /** Patient: phone + password → POST /api/v1/auth/patient/login */
+  patientLogin: (phone: string, password: string) => Promise<void>
+  patientSignup: (payload: {
+    phone: string
+    email: string
+    fullName: string
+    password: string
+  }) => Promise<void>
+  /** Clinician / admin: email + password → POST /api/v1/auth/doctor/login */
   doctorLogin: (email: string, password: string) => Promise<void>
-  /** Clinician signup → POST /api/v1/auth/staff/signup */
+  /** Clinician signup → POST /api/v1/auth/doctor/signup */
   doctorSignup: (payload: {
     email: string
     password: string
@@ -43,8 +50,12 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       token: null,
-      patientLogin: async (phone) => {
-        const { user, accessToken } = await patientLoginApi(phone)
+      patientLogin: async (phone, password) => {
+        const { user, accessToken } = await patientLoginApi(phone, password)
+        set({ user, token: accessToken })
+      },
+      patientSignup: async (payload) => {
+        const { user, accessToken } = await patientSignupApi(payload)
         set({ user, token: accessToken })
       },
       doctorLogin: async (email, password) => {

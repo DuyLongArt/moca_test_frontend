@@ -11,6 +11,7 @@ import {
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../stores/authStore'
+import { patientAuthStatus } from '../../features/auth/auth.api'
 import { adoptDevRole, isDevAuthBypass } from '../../shared/lib/devAuth'
 import { validateVnPhone } from '../../shared/utils/phone'
 import '../../styles/stitch-elderly.css'
@@ -21,7 +22,7 @@ const inputClass =
   'stitch-input w-full h-12 px-5 bg-surface-container-lowest border-2 border-outline rounded-xl text-lg text-on-surface placeholder:text-on-surface-variant'
 
 const steps = [
-  'Nhấn bắt đầu và nhập số điện thoại.',
+  'Nhấn bắt đầu, nhập số điện thoại và mật khẩu.',
   'Làm từng phần — một câu hỏi mỗi màn hình.',
   'Xem kết quả sau khi bác sĩ chấm.',
 ]
@@ -29,10 +30,14 @@ const steps = [
 export function LandingPage() {
   const navigate = useNavigate()
   const patientLogin = useAuthStore((s) => s.patientLogin)
+  const patientSignup = useAuthStore((s) => s.patientSignup)
   const user = useAuthStore((s) => s.user)
   const [menuOpen, setMenuOpen] = useState(false)
   const [phoneOpen, setPhoneOpen] = useState(false)
   const [phone, setPhone] = useState('')
+  const [password, setPassword] = useState('')
+  const [email, setEmail] = useState('')
+  const [fullName, setFullName] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
@@ -49,13 +54,32 @@ export function LandingPage() {
       setError('message' in phoneCheck ? phoneCheck.message : 'Số điện thoại không hợp lệ')
       return
     }
+    if (password.length < 8) {
+      setError('Mật khẩu tối thiểu 8 ký tự.')
+      return
+    }
     setError(null)
     setSubmitting(true)
     try {
-      await patientLogin(phoneCheck.normalized)
+      const status = await patientAuthStatus(phoneCheck.normalized)
+      if (status.hasPassword) {
+        await patientLogin(phoneCheck.normalized, password)
+      } else {
+        if (!email.trim() || !fullName.trim()) {
+          setError('Nhập họ tên và email để tạo mật khẩu lần đầu.')
+          return
+        }
+        await patientSignup({
+          phone: phoneCheck.normalized,
+          email: email.trim(),
+          fullName: fullName.trim(),
+          password,
+        })
+      }
       navigate('/patient')
-    } catch {
-      setError('Không đăng nhập được. Kiểm tra số điện thoại hoặc thử lại sau.')
+    } catch (err) {
+      const message = err instanceof Error ? err.message : ''
+      setError(message || 'Không đăng nhập được. Kiểm tra thông tin hoặc thử lại sau.')
     } finally {
       setSubmitting(false)
     }
@@ -218,27 +242,82 @@ export function LandingPage() {
               </button>
             </div>
             <p className="text-sm text-on-surface-variant">
-              Nhập số điện thoại để bắt đầu bài đánh giá MoCA.
+              Nhập số điện thoại và mật khẩu để bắt đầu bài đánh giá MoCA.
             </p>
-            <div className="mt-4">
-              <label htmlFor="landing-phone" className="mb-2 block text-sm font-semibold text-on-surface">
-                Số điện thoại
-              </label>
-              <input
-                id="landing-phone"
-                type="tel"
-                inputMode="tel"
-                autoComplete="tel"
-                className={inputClass}
-                placeholder="0901234567"
-                value={phone}
-                onChange={(e) => {
-                  setPhone(e.target.value)
-                  setError(null)
-                }}
-                required
-                autoFocus
-              />
+            <div className="mt-4 space-y-3">
+              <div>
+                <label htmlFor="landing-phone" className="mb-2 block text-sm font-semibold text-on-surface">
+                  Số điện thoại
+                </label>
+                <input
+                  id="landing-phone"
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  className={inputClass}
+                  placeholder="0901234567"
+                  value={phone}
+                  onChange={(e) => {
+                    setPhone(e.target.value)
+                    setError(null)
+                  }}
+                  required
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label htmlFor="landing-password" className="mb-2 block text-sm font-semibold text-on-surface">
+                  Mật khẩu
+                </label>
+                <input
+                  id="landing-password"
+                  type="password"
+                  autoComplete="current-password"
+                  className={inputClass}
+                  placeholder="Tối thiểu 8 ký tự"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value)
+                    setError(null)
+                  }}
+                  minLength={8}
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="landing-full-name" className="mb-2 block text-sm font-semibold text-on-surface">
+                  Họ tên <span className="font-normal text-on-surface-variant">(khi tạo mới)</span>
+                </label>
+                <input
+                  id="landing-full-name"
+                  type="text"
+                  autoComplete="name"
+                  className={inputClass}
+                  placeholder="Nguyễn Văn A"
+                  value={fullName}
+                  onChange={(e) => {
+                    setFullName(e.target.value)
+                    setError(null)
+                  }}
+                />
+              </div>
+              <div>
+                <label htmlFor="landing-email" className="mb-2 block text-sm font-semibold text-on-surface">
+                  Email <span className="font-normal text-on-surface-variant">(khi tạo mới)</span>
+                </label>
+                <input
+                  id="landing-email"
+                  type="email"
+                  autoComplete="email"
+                  className={inputClass}
+                  placeholder="patient@example.com"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value)
+                    setError(null)
+                  }}
+                />
+              </div>
             </div>
             {error && (
               <p className="mt-3 text-sm text-error" role="alert">
@@ -247,11 +326,21 @@ export function LandingPage() {
             )}
             <button
               type="submit"
-              disabled={submitting || !phoneReady}
+              disabled={submitting || !phoneReady || password.length < 8}
               className="mt-5 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary text-base font-bold text-on-primary disabled:opacity-60"
             >
-              {submitting ? 'Đang đăng nhập…' : 'Bắt đầu đánh giá'}
+              {submitting ? 'Đang xử lý…' : 'Bắt đầu đánh giá'}
               <ArrowRight size={20} />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setPhoneOpen(false)
+                navigate('/forgot-password?role=patient')
+              }}
+              className="mt-4 w-full text-center text-sm text-primary hover:underline"
+            >
+              Quên mật khẩu?
             </button>
           </form>
         </div>

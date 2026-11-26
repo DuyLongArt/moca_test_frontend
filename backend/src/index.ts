@@ -7,6 +7,7 @@ const READY_PATH = "/api/v1/health";
 const INSTANCE_NAME = "moca";
 const FORGOT_PASSWORD_PATH = "/api/v1/auth/forgot-password";
 const INTERNAL_FORGOT_PATH = "/internal/password-reset/request";
+const INTERNAL_D1_PATH = "/internal/d1/query";
 const GENERIC_FORGOT_MESSAGE =
 	"If an account exists for that email, a password reset link has been sent.";
 
@@ -40,6 +41,8 @@ function containerEnv(env: Env, instanceId: string): Record<string, string> {
 		"DB_USER",
 		"DB_PASSWORD",
 		"JWT_SECRET",
+		"D1_PROXY_URL",
+		"D1_PROXY_TOKEN",
 		"REDIS_ENABLED",
 		"REDIS_HOST",
 		"REDIS_PORT",
@@ -120,6 +123,12 @@ export class MyContainer extends DurableObject<Env> {
 		await container.setInactivityTimeout(INACTIVITY_TIMEOUT_MS);
 
 		const port = container.getTcpPort(PORT);
+		const deadline = Date.now() + 30_000;
+		while (Date.now() < deadline) {
+			const response = await port.fetch(`http://container${READY_PATH}`);
+			if (response.ok) return;
+			await new Promise((resolve) => setTimeout(resolve, 200));
+		}
 		throw new Error("MoCA container did not become ready on port 8080");
 	}
 
@@ -138,6 +147,75 @@ export class MyContainer extends DurableObject<Env> {
 
 const app = new Hono<{ Bindings: Env }>();
 
+type D1StatementInput = { sql: string; params?: unknown[] };
+
+app.post(INTERNAL_D1_PATH, async (c) => {
+	const env = c.env as Env & { D1_PROXY_TOKEN?: string };
+	if (!env.D1_PROXY_TOKEN || c.req.header("x-d1-proxy-token") !== env.D1_PROXY_TOKEN) {
+		return c.json({ success: false, error: "Unauthorized" }, 401);
+	}
+
+	let body: unknown;
+	try {
+		body = await c.req.json();
+	} catch {
+		return c.json({ success: false, error: "Cannot parse JSON payload" }, 400);
+	}
+	if (!body || typeof body !== "object") {
+		return c.json({ success: false, error: "Invalid D1 request" }, 400);
+	}
+
+	const payload = body as {
+		sql?: unknown;
+		params?: unknown;
+		raw?: unknown;
+		batch?: unknown;
+	};
+	const db = c.env.moca_db_lite;
+	const prepare = (input: unknown): D1PreparedStatement => {
+		if (!input || typeof input !== "object") throw new Error("Invalid statement");
+		const { sql, params } = input as D1StatementInput;
+		if (typeof sql !== "string") throw new Error("SQL is required");
+		const values = Array.isArray(params) ? params : [];
+		return values.length > 0 ? db.prepare(sql).bind(...values) : db.prepare(sql);
+	};
+
+	try {
+		if (Array.isArray(payload.batch)) {
+			const statements = payload.batch.map(prepare);
+			const results = statements.length > 0 ? await db.batch(statements) : [];
+			return c.json({
+				success: true,
+				results: results.map((result) => ({
+					success: result.success,
+					meta: result.meta,
+				})),
+			});
+		}
+
+		const statement = prepare(body);
+		if (payload.raw === true) {
+			const rows = await statement.raw<unknown[]>({ columnNames: true });
+			return c.json({
+				success: true,
+				columns: rows[0] ?? [],
+				rows: rows.slice(1),
+			});
+		}
+
+		const result = await statement.run();
+		return c.json({ success: result.success, meta: result.meta });
+	} catch (error) {
+		return c.json(
+			{
+				success: false,
+				error: error instanceof Error ? error.message : String(error),
+			},
+			400,
+		);
+	}
+});
+
 app.post(FORGOT_PASSWORD_PATH, async (c) => {
 	let body: unknown;
 	try {
@@ -154,6 +232,10 @@ app.post(FORGOT_PASSWORD_PATH, async (c) => {
 			? (body as { email?: unknown }).email
 			: null,
 	);
+	const role =
+		body && typeof body === "object" && "role" in body && (body as { role?: unknown }).role === "patient"
+			? "patient"
+			: "doctor";
 	if (!email) {
 		return c.json(
 			{ status: "ERROR", code: 400, message: "Invalid email address" },
@@ -165,7 +247,7 @@ app.post(FORGOT_PASSWORD_PATH, async (c) => {
 		new Request(new URL(INTERNAL_FORGOT_PATH, c.req.url), {
 			method: "POST",
 			headers: { "content-type": "application/json" },
-			body: JSON.stringify({ email }),
+			body: JSON.stringify({ email, role }),
 		}),
 	);
 	if (!upstream.ok) {
@@ -183,15 +265,19 @@ app.post(FORGOT_PASSWORD_PATH, async (c) => {
 	}
 
 	let token: string | undefined;
+	let resetRole: "doctor" | "patient" = role;
 	try {
-		const payload = await upstream.json<{ data?: { token?: string } }>();
+		const payload = await upstream.json<{ data?: { token?: string; role?: string } }>();
 		token = payload.data?.token;
+		if (payload.data?.role === "patient" || payload.data?.role === "doctor") {
+			resetRole = payload.data.role;
+		}
 	} catch {
 		token = undefined;
 	}
 
 	if (token) {
-		const resetUrl = `${new URL(c.req.url).origin}/reset-password?token=${encodeURIComponent(token)}`;
+		const resetUrl = `${new URL(c.req.url).origin}/reset-password?token=${encodeURIComponent(token)}&role=${resetRole}`;
 		try {
 			await c.env.EMAIL.send({
 				to: email,

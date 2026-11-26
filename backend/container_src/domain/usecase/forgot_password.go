@@ -42,6 +42,7 @@ func ForgotPasswordHandler(db *infas.DB_connection) http.HandlerFunc {
 
 		var request struct {
 			Email string `json:"email"`
+			Role  string `json:"role"`
 		}
 		decoder := json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20))
 		if err := decoder.Decode(&request); err != nil {
@@ -63,7 +64,11 @@ func ForgotPasswordHandler(db *infas.DB_connection) http.HandlerFunc {
 			return
 		}
 
-		token, found, err := db.CreatePasswordResetToken(r.Context(), email)
+		role := strings.ToLower(strings.TrimSpace(request.Role))
+		if role != "patient" {
+			role = "doctor"
+		}
+		token, found, err := db.CreatePasswordResetTokenForRole(r.Context(), email, role)
 		if err != nil {
 			writePasswordResetJSON(w, http.StatusInternalServerError, passwordResetResponse{
 				Status:  "ERROR",
@@ -79,7 +84,7 @@ func ForgotPasswordHandler(db *infas.DB_connection) http.HandlerFunc {
 			Message: "If the account exists, a reset link has been created",
 		}
 		if found {
-			response.Data = map[string]string{"token": token, "email": email}
+			response.Data = map[string]string{"token": token, "email": email, "role": role}
 		}
 		writePasswordResetJSON(w, http.StatusOK, response)
 	}
@@ -99,6 +104,7 @@ func ResetPasswordHandler(db *infas.DB_connection) http.HandlerFunc {
 		var request struct {
 			Token    string `json:"token"`
 			Password string `json:"password"`
+			Role     string `json:"role"`
 		}
 		decoder := json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20))
 		if err := decoder.Decode(&request); err != nil {
@@ -119,7 +125,11 @@ func ResetPasswordHandler(db *infas.DB_connection) http.HandlerFunc {
 			return
 		}
 
-		reset, err := db.ResetDoctorPassword(r.Context(), strings.TrimSpace(request.Token), request.Password)
+		role := strings.ToLower(strings.TrimSpace(request.Role))
+		if role != "patient" {
+			role = "doctor"
+		}
+		reset, err := db.ResetPasswordForRole(r.Context(), strings.TrimSpace(request.Token), request.Password, role)
 		if err != nil {
 			writePasswordResetJSON(w, http.StatusInternalServerError, passwordResetResponse{
 				Status:  "ERROR",

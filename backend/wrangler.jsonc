@@ -44,7 +44,7 @@
 		{
 			"binding": "moca_db_lite",
 			"database_name": "moca_db_lite",
-			"database_id": "f7667fef-a3a5-430e-8971-263492728bf7",
+			"database_id": "482d1d86-79d7-483a-9bed-daca747571e9",
 			"remote": true
 		}
 	],
@@ -54,7 +54,8 @@
 		}
 	],
 	"vars": {
-		"EMAIL_FROM": "no-reply@yourdomain.com"
+		"EMAIL_FROM": "no-reply@icelab.space",
+		"D1_PROXY_URL": "https://mocatestdeploy.duylongart.workers.dev"
 	}
 	/**
 	 * Smart Placement

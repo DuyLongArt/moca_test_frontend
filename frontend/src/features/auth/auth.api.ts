@@ -14,9 +14,40 @@ export type AuthUserDto = {
   educationYears?: number | null
 }
 
-type LoginResponse = {
-  accessToken: string
-  user: AuthUserDto
+type ApiEnvelope<T> = {
+  status?: string
+  code?: number
+  message?: string
+  data?: T
+}
+
+type ClinicAuthData = {
+  id?: string | number
+  email?: string
+  phoneNumber?: string
+  phone_number?: string
+  fullName?: string
+  full_name?: string
+  role?: UserRole
+  token?: string
+  accessToken?: string
+}
+
+function mapClinicAuth(
+  envelope: ApiEnvelope<ClinicAuthData>,
+  fallback: Partial<AuthUser>,
+): { user: AuthUser; accessToken: string } {
+  const data = envelope.data ?? {}
+  return {
+    accessToken: data.accessToken ?? data.token ?? '',
+    user: {
+      id: String(data.id ?? fallback.id ?? ''),
+      email: data.email ?? fallback.email ?? '',
+      phoneNumber: data.phoneNumber ?? data.phone_number ?? fallback.phoneNumber ?? '',
+      fullName: data.fullName ?? data.full_name ?? fallback.fullName ?? '',
+      role: data.role ?? fallback.role ?? 'DOCTOR',
+    },
+  }
 }
 
 export function mapAuthUserDto(data: AuthUserDto): AuthUser {
@@ -32,24 +63,59 @@ export function mapAuthUserDto(data: AuthUserDto): AuthUser {
   }
 }
 
-function mapLogin(data: LoginResponse): { user: AuthUser; accessToken: string } {
-  return {
-    accessToken: data.accessToken,
-    user: mapAuthUserDto(data.user),
-  }
-}
-
-/** Patient — phone only, no password. */
 export async function patientLogin(
   phone: string,
+  password: string,
 ): Promise<{ user: AuthUser; accessToken: string }> {
   if (isMockApi()) {
     return { accessToken: 'dev-bypass', user: { ...getDevUser('PATIENT'), phoneNumber: phone } }
   }
-  const { data } = await api.post<LoginResponse>('/api/v1/auth/patient/login', {
+  const { data } = await api.post<ApiEnvelope<ClinicAuthData>>('/api/v1/auth/patient/login', {
     phone_number: phone,
+    password,
   })
-  return mapLogin(data)
+  return mapClinicAuth(data, {
+    phoneNumber: phone,
+    role: 'PATIENT',
+    fullName: '',
+  })
+}
+
+export async function patientAuthStatus(phone: string): Promise<{ exists: boolean; hasPassword: boolean }> {
+  if (isMockApi()) return { exists: false, hasPassword: false }
+  const { data } = await api.post<
+    ApiEnvelope<{ exists?: boolean; has_password?: boolean }>
+  >('/api/v1/auth/patient/status', { phone_number: phone })
+  return {
+    exists: data.data?.exists ?? false,
+    hasPassword: data.data?.has_password ?? false,
+  }
+}
+
+export async function patientSignup(payload: {
+  phone: string
+  email: string
+  fullName: string
+  password: string
+}): Promise<{ user: AuthUser; accessToken: string }> {
+  if (isMockApi()) {
+    return {
+      accessToken: 'dev-bypass',
+      user: { ...getDevUser('PATIENT'), phoneNumber: payload.phone, email: payload.email, fullName: payload.fullName },
+    }
+  }
+  const { data } = await api.post<ApiEnvelope<ClinicAuthData>>('/api/v1/auth/patient/signup', {
+    phone_number: payload.phone,
+    email: payload.email,
+    full_name: payload.fullName,
+    password: payload.password,
+  })
+  return mapClinicAuth(data, {
+    phoneNumber: payload.phone,
+    email: payload.email,
+    fullName: payload.fullName,
+    role: 'PATIENT',
+  })
 }
 
 /** Doctor / admin — email + password. */
@@ -61,21 +127,31 @@ export async function doctorLogin(
     const role: UserRole = email.includes('admin') ? 'ADMIN' : 'DOCTOR'
     return { accessToken: 'dev-bypass', user: { ...getDevUser(role), email } }
   }
-  const { data } = await api.post<LoginResponse>('/api/v1/auth/staff/login', {
+  const { data } = await api.post<ApiEnvelope<ClinicAuthData>>('/api/v1/auth/doctor/login', {
     email,
     password,
   })
-  return mapLogin(data)
+  return mapClinicAuth(data, {
+    email,
+    role: email.includes('admin') ? 'ADMIN' : 'DOCTOR',
+    fullName: '',
+  })
 }
 
-export async function requestPasswordReset(email: string): Promise<void> {
+export type PasswordResetRole = 'doctor' | 'patient'
+
+export async function requestPasswordReset(email: string, role: PasswordResetRole = 'doctor'): Promise<void> {
   if (isMockApi()) return
-  await api.post('/api/v1/auth/forgot-password', { email })
+  await api.post('/api/v1/auth/forgot-password', { email, role })
 }
 
-export async function resetPassword(token: string, password: string): Promise<void> {
+export async function resetPassword(
+  token: string,
+  password: string,
+  role: PasswordResetRole = 'doctor',
+): Promise<void> {
   if (isMockApi()) return
-  await api.post('/api/v1/auth/reset-password', { token, password })
+  await api.post('/api/v1/auth/reset-password', { token, password, role })
 }
 
 /** Doctor signup — creates account + returns JWT. */
@@ -92,6 +168,10 @@ export async function doctorSignup(payload: {
       user: { ...getDevUser('DOCTOR'), email: payload.email, fullName: payload.fullName },
     }
   }
-  const { data } = await api.post<LoginResponse>('/api/v1/auth/staff/signup', payload)
-  return mapLogin(data)
+  const { data } = await api.post<ApiEnvelope<ClinicAuthData>>('/api/v1/auth/doctor/signup', payload)
+  return mapClinicAuth(data, {
+    email: payload.email,
+    fullName: payload.fullName,
+    role: 'DOCTOR',
+  })
 }

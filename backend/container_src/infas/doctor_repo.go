@@ -14,22 +14,20 @@ import (
 
 func (app *DB_connection) AuthenticateDoctor(ctx context.Context, email, password string) (*infas.Doctor, error) {
 	query := `
-		SELECT id, email, full_name, password_hash, specialty, license_number
-		FROM doctor
-		WHERE email = $1
+		SELECT id, email, full_name, password_hash, specialty
+		FROM doctors
+		WHERE email = ?
 		LIMIT 1
 	`
 
 	var doctor infas.Doctor
 
-	// 1. Query the database for the user by email
 	err := app.DB.QueryRowContext(ctx, query, email).Scan(
 		&doctor.ID,
 		&doctor.Email,
 		&doctor.FullName,
 		&doctor.PasswordHash,
 		&doctor.Specialty,
-		&doctor.LicenseNumber,
 	)
 
 	if err != nil {
@@ -50,7 +48,7 @@ func (app *DB_connection) AuthenticateDoctor(ctx context.Context, email, passwor
 	return &doctor, nil
 }
 func (app *DB_connection) GetEmailPassFromDoctor(ctx context.Context, requestEmail string) (string, string, error) {
-	query := "SELECT email, password_hash FROM doctor WHERE email = ?"
+	query := "SELECT email, password_hash FROM doctors WHERE email = ?"
 	var email string
 	var hash_password string
 	err := app.DB.QueryRowContext(ctx, query, requestEmail).Scan(&email, &hash_password)
@@ -65,7 +63,7 @@ func (app *DB_connection) UpsertDoctorAccount(
 	passwordHash string,
 ) (int64, error) {
 	query := `
-        INSERT INTO doctor (
+        INSERT INTO doctors (
             email, 
             password_hash,
 			full_name

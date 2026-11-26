@@ -1,10 +1,12 @@
 import { ArrowLeft, ArrowRight, MailCheck } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
-import { requestPasswordReset } from './auth.api'
+import { Link, useSearchParams } from 'react-router-dom'
+import { requestPasswordReset, type PasswordResetRole } from './auth.api'
 import { AuthPageShell, authInputClass, authPrimaryBtn } from './AuthPageShell'
 
 export function ForgotPasswordPage() {
+  const [searchParams] = useSearchParams()
+  const role: PasswordResetRole = searchParams.get('role') === 'patient' ? 'patient' : 'doctor'
   const [email, setEmail] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -15,7 +17,7 @@ export function ForgotPasswordPage() {
     setError(null)
     setSubmitting(true)
     try {
-      await requestPasswordReset(email.trim())
+      await requestPasswordReset(email.trim(), role)
       setSubmitted(true)
     } catch {
       setError('Không gửi được liên kết đặt lại. Vui lòng thử lại sau.')
@@ -36,7 +38,7 @@ export function ForgotPasswordPage() {
             Nếu tài khoản tồn tại, bạn sẽ nhận được liên kết đặt lại mật khẩu trong email.
             Liên kết có hiệu lực trong 30 phút.
           </p>
-          <Link to="/login" className={authPrimaryBtn}>
+          <Link to={role === 'patient' ? '/entry' : '/login'} className={authPrimaryBtn}>
             <span>Về đăng nhập</span>
             <ArrowRight size={18} />
           </Link>
@@ -48,7 +50,11 @@ export function ForgotPasswordPage() {
   return (
     <AuthPageShell
       title="Quên mật khẩu"
-      subtitle="Nhập email bác sĩ để nhận liên kết đặt lại mật khẩu."
+      subtitle={
+        role === 'patient'
+          ? 'Nhập email bệnh nhân để nhận liên kết đặt lại mật khẩu.'
+          : 'Nhập email bác sĩ để nhận liên kết đặt lại mật khẩu.'
+      }
     >
       <form className="flex flex-col space-y-3" onSubmit={handleSubmit}>
         <div className="flex flex-col space-y-1">
@@ -59,7 +65,7 @@ export function ForgotPasswordPage() {
             id="reset-email"
             type="email"
             className={authInputClass}
-            placeholder="doctor@benhvien.vn"
+            placeholder={role === 'patient' ? 'patient@example.com' : 'doctor@benhvien.vn'}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             autoComplete="email"
@@ -81,7 +87,7 @@ export function ForgotPasswordPage() {
 
       <div className="mt-4 text-center">
         <Link
-          to="/login"
+          to={role === 'patient' ? '/entry' : '/login'}
           className="inline-flex items-center gap-1 text-sm text-on-surface-variant hover:underline"
         >
           <ArrowLeft size={16} />

@@ -1,12 +1,13 @@
 import { ArrowLeft, ArrowRight, CheckCircle2, Eye, EyeOff } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { resetPassword } from './auth.api'
+import { resetPassword, type PasswordResetRole } from './auth.api'
 import { AuthPageShell, authInputClass, authPrimaryBtn } from './AuthPageShell'
 
 export function ResetPasswordPage() {
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token')?.trim() ?? ''
+  const role: PasswordResetRole = searchParams.get('role') === 'patient' ? 'patient' : 'doctor'
 
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -34,7 +35,7 @@ export function ResetPasswordPage() {
 
     setSubmitting(true)
     try {
-      await resetPassword(token, password)
+      await resetPassword(token, password, role)
       setDone(true)
     } catch {
       setError('Không đặt lại được mật khẩu. Liên kết có thể đã hết hạn hoặc đã được dùng.')
@@ -51,7 +52,7 @@ export function ResetPasswordPage() {
           <p className="text-sm text-on-surface-variant">
             Bạn có thể đăng nhập bằng mật khẩu mới.
           </p>
-          <Link to="/login" className={authPrimaryBtn}>
+          <Link to={role === 'patient' ? '/entry' : '/login'} className={authPrimaryBtn}>
             <span>Đăng nhập</span>
             <ArrowRight size={18} />
           </Link>
@@ -63,7 +64,11 @@ export function ResetPasswordPage() {
   return (
     <AuthPageShell
       title="Đặt lại mật khẩu"
-      subtitle="Chọn mật khẩu mới cho tài khoản bác sĩ của bạn."
+      subtitle={
+        role === 'patient'
+          ? 'Chọn mật khẩu mới cho tài khoản bệnh nhân của bạn.'
+          : 'Chọn mật khẩu mới cho tài khoản bác sĩ của bạn.'
+      }
     >
       <form className="flex flex-col space-y-3" onSubmit={handleSubmit}>
         <div className="flex flex-col space-y-1">
@@ -123,7 +128,7 @@ export function ResetPasswordPage() {
 
       <div className="mt-4 text-center">
         <Link
-          to="/forgot-password"
+          to={role === 'patient' ? '/forgot-password?role=patient' : '/forgot-password'}
           className="inline-flex items-center gap-1 text-sm text-on-surface-variant hover:underline"
         >
           <ArrowLeft size={16} />

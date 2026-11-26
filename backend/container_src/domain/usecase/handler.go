@@ -5,52 +5,97 @@ import (
 	"fmt"
 	"net/http"
 	"server/infas"
+	"strings"
 
 	jwt "github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	// "server/infas"
 )
 
-func PatientHandler(db_connector *infas.DB_connection) http.HandlerFunc {
+func PatientHandler(db *infas.DB_connection) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		var request PatientLoginRequest
-		var response StandardResponse
-		error := json.NewDecoder(r.Body).Decode(&request)
-		email, hash_password, error := db_connector.GetEmailPassFromDoctor(r.Context(), request.PhoneNumber)
-
-		if error != nil {
-			http.Error(w, "Invalid credential, sign up new account", http.StatusUnauthorized)
-			db_connector.AddPatientAccount(r.Context(), request.PhoneNumber)
+		var request struct {
+			PhoneNumber  string `json:"phone_number"`
+			PhoneSnake   string `json:"phoneNumber"`
+			Phone        string `json:"phone"`
+			Password     string `json:"password"`
+		}
+		if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20)).Decode(&request); err != nil {
+			writeStandardJSON(w, http.StatusBadRequest, StandardResponse{
+				Status:  "ERROR",
+				Code:    http.StatusBadRequest,
+				Message: "Cannot parse JSON payload",
+			})
+			return
+		}
+		phone := strings.TrimSpace(request.PhoneNumber)
+		if phone == "" {
+			phone = strings.TrimSpace(request.PhoneSnake)
+		}
+		if phone == "" {
+			phone = strings.TrimSpace(request.Phone)
+		}
+		if phone == "" || len(request.Password) < 8 {
+			writeStandardJSON(w, http.StatusBadRequest, StandardResponse{
+				Status:  "ERROR",
+				Code:    http.StatusBadRequest,
+				Message: "A valid phone and password of at least 8 characters are required",
+			})
 			return
 		}
 
-		if len(hash_password) > 0 {
-			jwt, error := GenerateToken(email, "Patient")
-			if error != nil {
-				http.Error(w, "Can not generate token", http.StatusInternalServerError)
-			}
-
-			response.Data = map[string]any{
-				"token": jwt,
-			}
-			if error != nil {
-				http.Error(w, "The request is not encodeded", http.StatusBadRequest)
-				return
-			}
-		} else {
-
+		info, found, err := db.GetPatientAuthInfo(r.Context(), phone)
+		if err != nil {
+			writeStandardJSON(w, http.StatusInternalServerError, StandardResponse{
+				Status:  "ERROR",
+				Code:    http.StatusInternalServerError,
+				Message: "Could not sign in",
+			})
+			return
+		}
+		if !found || info.PasswordHash == "" {
+			writeStandardJSON(w, http.StatusUnauthorized, StandardResponse{
+				Status:  "ERROR",
+				Code:    http.StatusUnauthorized,
+				Message: "Create a password before signing in",
+			})
+			return
+		}
+		if err := bcrypt.CompareHashAndPassword([]byte(info.PasswordHash), []byte(request.Password)); err != nil {
+			writeStandardJSON(w, http.StatusUnauthorized, StandardResponse{
+				Status:  "ERROR",
+				Code:    http.StatusUnauthorized,
+				Message: "Invalid phone or password",
+			})
+			return
 		}
 
-		response.Status = "OK"
-		response.Code = 200
-		response.Message = "Login succesfully"
-		json.NewEncoder(w).Encode(response)
+		token, err := GenerateToken(info.PhoneNumber, "Patient")
+		if err != nil {
+			writeStandardJSON(w, http.StatusInternalServerError, StandardResponse{
+				Status:  "ERROR",
+				Code:    http.StatusInternalServerError,
+				Message: "Could not generate token",
+			})
+			return
+		}
+		writeStandardJSON(w, http.StatusOK, StandardResponse{
+			Status:  "OK",
+			Code:    http.StatusOK,
+			Message: "Login succesfully",
+			Data: map[string]any{
+				"token":        token,
+				"id":           info.ID,
+				"email":        info.Email,
+				"full_name":    info.FullName,
+				"phone_number": info.PhoneNumber,
+			},
+		})
 	}
 }
 
@@ -96,7 +141,7 @@ func DoctorHandler(db_connector *infas.DB_connection) http.HandlerFunc {
 
 			}
 			if len(hash_password) > 0 {
-				jwt, error := GenerateToken(email, "Patient")
+				jwt, error := GenerateToken(email, "Doctor")
 				if error != nil {
 					http.Error(w, "Can not generate token", http.StatusInternalServerError)
 				}
