@@ -13,7 +13,7 @@ RUN go mod download
 COPY container_src/ ./
 
 # Build
-RUN CGO_ENABLED=0 GOOS=linux go build -o /server
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /server
 
 FROM scratch
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
