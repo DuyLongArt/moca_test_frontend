@@ -2,6 +2,7 @@ import { ArrowLeft, ArrowRight, Eye, EyeOff } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useAuthStore } from '../../stores/authStore'
+import { getApiErrorMessage } from '../../shared/utils/apiError'
 import { AuthPageShell, authInputClass, authPrimaryBtn } from './AuthPageShell'
 
 export function DoctorSignupPage() {
@@ -42,7 +43,7 @@ export function DoctorSignupPage() {
       if (status === 409) {
         setError('Email này đã được đăng ký. Vui lòng đăng nhập.')
       } else {
-        setError('Không đăng ký được. Vui lòng thử lại sau.')
+        setError(getApiErrorMessage(err, 'Không đăng ký được. Vui lòng thử lại sau.'))
       }
     } finally {
       setSubmitting(false)

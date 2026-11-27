@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../stores/authStore'
 import { patientAuthStatus } from '../../features/auth/auth.api'
 import { adoptDevRole, isDevAuthBypass } from '../../shared/lib/devAuth'
+import { getApiErrorMessage } from '../../shared/utils/apiError'
 import { validateVnPhone } from '../../shared/utils/phone'
 import '../../styles/stitch-elderly.css'
 
@@ -78,8 +79,9 @@ export function LandingPage() {
       }
       navigate('/patient')
     } catch (err) {
-      const message = err instanceof Error ? err.message : ''
-      setError(message || 'Không đăng nhập được. Kiểm tra thông tin hoặc thử lại sau.')
+      setError(
+        getApiErrorMessage(err, 'Không đăng nhập được. Kiểm tra thông tin hoặc thử lại sau.'),
+      )
     } finally {
       setSubmitting(false)
     }

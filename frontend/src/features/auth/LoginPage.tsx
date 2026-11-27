@@ -2,6 +2,7 @@ import { ArrowLeft, ArrowRight, Eye, EyeOff } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useAuthStore } from '../../stores/authStore'
+import { getApiErrorMessage } from '../../shared/utils/apiError'
 import { AuthPageShell, authInputClass, authPrimaryBtn, authSecondaryBtn } from './AuthPageShell'
 
 export function LoginPage() {
@@ -26,8 +27,8 @@ export function LoginPage() {
     setSubmitting(true)
     try {
       await doctorLogin(email.trim(), password)
-    } catch {
-      setError('Email hoặc mật khẩu không đúng.')
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'Email hoặc mật khẩu không đúng.'))
     } finally {
       setSubmitting(false)
     }

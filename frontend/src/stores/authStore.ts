@@ -48,32 +48,39 @@ type AuthState = {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
-      user: null,
-      token: null,
-      patientLogin: async (phone, password) => {
-        const { user, accessToken } = await patientLoginApi(phone, password)
-        set({ user, token: accessToken })
-      },
-      patientSignup: async (payload) => {
-        const { user, accessToken } = await patientSignupApi(payload)
-        set({ user, token: accessToken })
-      },
-      doctorLogin: async (email, password) => {
-        const { user, accessToken } = await doctorLoginApi(email, password)
-        set({ user, token: accessToken })
-      },
-      doctorSignup: async (payload) => {
-        const { user, accessToken } = await doctorSignupApi(payload)
-        const token = accessToken || (await doctorLoginApi(payload.email, payload.password)).accessToken
+    (set) => {
+      const authenticate = (user: AuthUser, token: string) => {
         set({ user, token })
-      },
-      updateUser: (user) => set({ user }),
-      logout: () => {
-        set({ user: null, token: null })
         queryClient.clear()
-      },
-    }),
+      }
+
+      return {
+        user: null,
+        token: null,
+        patientLogin: async (phone, password) => {
+          const { user, accessToken } = await patientLoginApi(phone, password)
+          authenticate(user, accessToken)
+        },
+        patientSignup: async (payload) => {
+          const { user, accessToken } = await patientSignupApi(payload)
+          authenticate(user, accessToken)
+        },
+        doctorLogin: async (email, password) => {
+          const { user, accessToken } = await doctorLoginApi(email, password)
+          authenticate(user, accessToken)
+        },
+        doctorSignup: async (payload) => {
+          const { user, accessToken } = await doctorSignupApi(payload)
+          const token = accessToken || (await doctorLoginApi(payload.email, payload.password)).accessToken
+          authenticate(user, token)
+        },
+        updateUser: (user) => set({ user }),
+        logout: () => {
+          set({ user: null, token: null })
+          queryClient.clear()
+        },
+      }
+    },
     { name: 'moca-auth' },
   ),
 )

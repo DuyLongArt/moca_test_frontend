@@ -3,16 +3,16 @@ export function phoneDigitCount(raw: string): number {
   return raw.replace(/\D/g, '').length
 }
 
-/** 0901234567 → 84901234567 — mirrors AuthService.normalizePhone */
+/** 84901234567 or +84890123456 → 0901234567 for the D1 patient records */
 export function normalizePhone(raw: string): string {
   const digits = raw.replace(/\D/g, '')
-  if (digits.startsWith('0')) {
-    return '84' + digits.slice(1)
+  if (digits.startsWith('84') && digits.length === 11) {
+    return '0' + digits.slice(2)
   }
   return digits
 }
 
-const VN_MOBILE = /^84[35789]\d{8}$/
+const VN_MOBILE = /^0[35789]\d{8}$/
 
 export function validateVnPhone(
   raw: string,
@@ -24,7 +24,7 @@ export function validateVnPhone(
     return { ok: false, message: 'Vui lòng nhập số điện thoại.' }
   }
   const normalized = normalizePhone(raw.trim())
-  if (normalized.length !== 11 || !VN_MOBILE.test(normalized)) {
+  if (normalized.length !== 10 || !VN_MOBILE.test(normalized)) {
     return {
       ok: false,
       message: `Số điện thoại không hợp lệ (${count} số). Nhập 10 số, ví dụ 0901234567.`,
