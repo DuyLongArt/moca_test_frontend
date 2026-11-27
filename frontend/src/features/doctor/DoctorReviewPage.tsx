@@ -285,9 +285,11 @@ export function DoctorReviewPage() {
   const approveMutation = useApproveReview(id ?? '')
 
   const [scores, setScores] = React.useState<Record<string, number>>({})
+  const initializedIdRef = React.useRef<string | null>(null)
 
   React.useEffect(() => {
-    if (session) {
+    if (session && initializedIdRef.current !== session.id) {
+      initializedIdRef.current = session.id
       const initial: Record<string, number> = {}
       for (const s of session.sectionScores) {
         if (s.doctorScore !== null) initial[s.sectionKey] = s.doctorScore

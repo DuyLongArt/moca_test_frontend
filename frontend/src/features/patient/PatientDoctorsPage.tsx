@@ -1,6 +1,7 @@
 import { Mail, MapPin, Phone, Star } from 'lucide-react'
 import { MocaPatientLayout } from '../../shared/components/layout/MocaPatientLayout'
 import { QueryState } from '../../shared/components/QueryState'
+import { getApiErrorMessage } from '../../shared/utils/apiError'
 import { useDoctorOptions, usePickClinician } from './usePatientQueries'
 
 export function PatientDoctorsPage() {
@@ -12,6 +13,11 @@ export function PatientDoctorsPage() {
       <p className="mb-3 shrink-0 text-sm text-on-surface-variant">
         Chọn bác sĩ phụ trách theo dõi kết quả MoCA của bạn.
       </p>
+      {pickClinician.isError && (
+        <p role="alert" className="mb-3 text-sm text-error">
+          {getApiErrorMessage(pickClinician.error, 'Không chọn được bác sĩ. Vui lòng thử lại.')}
+        </p>
+      )}
       <QueryState
         isLoading={isLoading}
         error={error}

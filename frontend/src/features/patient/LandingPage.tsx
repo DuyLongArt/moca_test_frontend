@@ -229,7 +229,12 @@ export function LandingPage() {
 
       {/* ── PHONE LOGIN SHEET ── */}
       {phoneOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-[var(--stitch-margin-mobile)]">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-[var(--stitch-margin-mobile)]"
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setPhoneOpen(false)
+          }}
+        >
           <button
             type="button"
             className="absolute inset-0"
@@ -238,6 +243,7 @@ export function LandingPage() {
           />
           <form
             role="dialog"
+            aria-modal="true"
             aria-labelledby="landing-sheet-title"
             onSubmit={(e) => { e.preventDefault(); handleContinue() }}
             className="relative w-full max-w-lg rounded-3xl border border-outline-variant bg-surface-container-lowest p-6 shadow-xl"
