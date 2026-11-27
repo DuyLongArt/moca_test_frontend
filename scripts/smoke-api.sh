@@ -20,7 +20,7 @@ check() {
 }
 
 status() {
-  curl -sS -o /dev/null -w "%{http_code}" "$@"
+  curl -sS --connect-timeout 5 --max-time 10 -o /dev/null -w "%{http_code}" "$@"
 }
 
 post_status() {

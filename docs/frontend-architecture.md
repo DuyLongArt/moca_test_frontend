@@ -122,14 +122,15 @@ MocaTestContainer onComplete
 
 ## Mock vs live API
 
-`.env`:
+`frontend/.env`:
 
 ```bash
-VITE_API_URL=          # empty = use Vite proxy /api
-VITE_USE_MOCK=true     # false when Spring endpoints exist
+VITE_API_URL=                 # empty = use Vite proxy /api
+VITE_PROXY_TARGET=https://... # Worker used by the dev proxy
+VITE_DEV_BYPASS_AUTH=false    # true enables mock API + dev auth bypass
 ```
 
-`*.api.ts` returns mock data when `VITE_USE_MOCK=true` (default until backend wired).
+`isMockApi()` returns true for `VITE_USE_MOCK=true`, false for `VITE_USE_MOCK=false`, and otherwise follows `VITE_DEV_BYPASS_AUTH` in dev only. With the committed `.env`, the frontend calls the real Worker-backed API.
 
 ---
 

@@ -12,7 +12,11 @@ type Props = {
 export function QueryState({ isLoading, error, children, empty, isEmpty }: Props) {
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center gap-2 py-12 text-slate-500">
+      <div
+        role="status"
+        aria-live="polite"
+        className="flex items-center justify-center gap-2 py-12 text-slate-500"
+      >
         <Loader2 size={20} className="animate-spin" />
         Đang tải…
       </div>
@@ -21,7 +25,10 @@ export function QueryState({ isLoading, error, children, empty, isEmpty }: Props
 
   if (error) {
     return (
-      <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+      <div
+        role="alert"
+        className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+      >
         Không tải được dữ liệu: {error.message}
       </div>
     )

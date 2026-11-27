@@ -14,6 +14,7 @@ const DOCTOR_NAV = [
 
 export function DoctorDashboardPage() {
   const { data: reviews = [], isLoading, error } = useDoctorReviews()
+  const { data: patients = [] } = useDoctorPatients()
   const aiOn = useUiStore((s) => s.doctorAiAssist)
   const setAiOn = useUiStore((s) => s.setDoctorAiAssist)
 
@@ -26,7 +27,7 @@ export function DoctorDashboardPage() {
         </GlassCard>
         <GlassCard>
           <p className="text-sm text-slate-500">Bệnh nhân</p>
-          <p className="text-3xl font-bold text-blue-600">12</p>
+          <p className="text-3xl font-bold text-blue-600">{patients.length}</p>
         </GlassCard>
         {/* Amber/yellow = AI assist (same convention as DoctorReviewPage) */}
         <GlassCard>

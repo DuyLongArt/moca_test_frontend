@@ -45,7 +45,9 @@ export function AdminDoctorsPage() {
     <AppShell title="Quản lý bác sĩ" nav={ADMIN_NAV}>
       <button
         type="button"
-        className="mb-6 inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 font-bold text-white hover:bg-blue-700"
+        disabled
+        title="Tính năng đang phát triển"
+        className="mb-6 inline-flex cursor-not-allowed items-center gap-2 rounded-2xl bg-slate-300 px-4 py-3 font-bold text-slate-600"
       >
         <Plus size={18} />
         Thêm bác sĩ
