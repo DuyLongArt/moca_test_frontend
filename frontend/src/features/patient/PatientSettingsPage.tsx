@@ -158,7 +158,7 @@ export function PatientSettingsPage() {
                 onChange={(e) => setEducationYears(e.target.value)}
               />
             </div>
-            {error && <p className="text-sm text-error">{error}</p>}
+            {error && <p role="alert" className="text-sm text-error">{error}</p>}
             <div className="flex gap-3 pt-1">
               <button
                 type="button"

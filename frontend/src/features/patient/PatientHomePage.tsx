@@ -53,7 +53,7 @@ export function PatientHomePage() {
           </p>
         )}
         {showDevHealth && isError && (
-          <p className="text-xs text-error">Không kết nối được API</p>
+          <p role="alert" className="text-xs text-error">Không kết nối được API</p>
         )}
       </section>
 

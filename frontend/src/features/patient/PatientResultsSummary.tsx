@@ -254,19 +254,12 @@ export function PatientResultsSummary({
 
       {/* Actions */}
       {!isPending && (
-        <section className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <button
-            type="button"
-            className="flex items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-semibold text-on-primary active:scale-[0.98]"
-          >
-            <CheckCircle2 size={18} />
-            Xem báo cáo đầy đủ
-          </button>
+        <section>
           <button
             type="button"
             onClick={handleExportPdf}
             disabled={exporting}
-            className="flex items-center justify-center gap-2 rounded-xl border-2 border-primary py-3 text-sm font-semibold text-primary active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-primary py-3 text-sm font-semibold text-primary active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <FileDown size={18} />
             {exporting ? 'Đang xuất…' : 'Xuất PDF'}

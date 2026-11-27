@@ -493,7 +493,7 @@ function CubeReference() {
 /* =============================================================================
    SECTION 1 — Visuospatial / Executive (3 canvas sub-tasks)
    ========================================================================== */
-function Section1Visuospatial({ speech, answers, setAnswer, onNext, onBack, enterFromBack }) {
+function Section1Visuospatial({ speech, setAnswer, onNext, onBack, enterFromBack }) {
   const sub = [
     {
       key: "section_1a_trail_canvas",
@@ -1032,10 +1032,9 @@ function Section3Memory({ set, speech, answers, setAnswer, onNext, onBack, markS
 /* =============================================================================
    SECTION 4 — Attention (digit spans, letter-A vigilance, serial 7s)
    ========================================================================== */
-function LetterAVigilance({ speech, onComplete }) {
+function LetterAVigilance({ onComplete }) {
   const [phase, setPhase] = useState("idle"); // idle | running | done
   const [shown, setShown] = useState("");
-  const [idx, setIdx] = useState(-1);
   const [flashA, setFlashA] = useState(false); // visual feedback for correct press
   const pressedRef = useRef(new Set()); // indices the user pressed on
   const idxRef = useRef(-1);
@@ -1052,7 +1051,6 @@ function LetterAVigilance({ speech, onComplete }) {
         return;
       }
       idxRef.current = i;
-      setIdx(i);
       setShown(ATTENTION.letterStream[i]);
       i++;
       timerRef.current = setTimeout(tick, 1000);
@@ -1247,7 +1245,7 @@ function Section4Attention({ speech, answers, setAnswer, onNext, onBack, enterFr
 
         {sub === 1 && (
           <div>
-            <LetterAVigilance speech={speech} onComplete={(r) => setAnswer("section_4b", r)} />
+            <LetterAVigilance onComplete={(r) => setAnswer("section_4b", r)} />
             {letterA && (
               <p className="mt-2 text-sm text-gray-500">
                 Số lỗi ghi nhận: {letterA.errors} (bỏ sót {letterA.omissions}, nhấn nhầm{" "}
