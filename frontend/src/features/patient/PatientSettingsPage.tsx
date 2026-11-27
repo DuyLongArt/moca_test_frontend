@@ -200,8 +200,8 @@ export function PatientSettingsPage() {
 
             <div className="grid grid-cols-2 gap-6">
               <div className="flex items-start gap-3">
-                <div className="rounded-xl bg-tertiary/10 p-2.5">
-                  <User className="h-5 w-5 text-tertiary" />
+                <div className="rounded-xl bg-surface-container p-2.5">
+                  <User className="h-5 w-5 text-on-surface-variant" />
                 </div>
                 <div>
                   <p className="mb-0.5 text-xs font-semibold uppercase tracking-wider text-outline">Giới tính</p>

@@ -43,7 +43,16 @@ export function AdminDoctorsPage() {
 
   return (
     <AppShell title="Quản lý bác sĩ" nav={ADMIN_NAV}>
-      <QueryState isLoading={isLoading} error={error}>
+      <QueryState
+        isLoading={isLoading}
+        error={error}
+        isEmpty={doctors.length === 0}
+        empty={
+          <p className="py-8 text-center text-sm text-slate-500">
+            Chưa có bác sĩ nào.
+          </p>
+        }
+      >
         <div className="space-y-3">
           {doctors.map((d) => (
             <GlassCard key={d.id} className="flex justify-between gap-4">

@@ -54,13 +54,13 @@ Integration: [`docs/stitch-integration.md`](docs/stitch-integration.md)
 | Làm test MoCA | `/patient/test` | patient | Wizard 9 phần → submit |
 | Kết quả | `/patient/results` | patient | Điểm tạm + chính thức |
 | Lịch khám | `/patient/appointments` | patient | Danh sách hẹn (read-only) |
-| Đổi bác sĩ | `/patient/doctors` | patient | Chọn BS mới |
+| Đổi bác sĩ | `/patient/clinicians` | patient | Chọn BS mới |
 | Cài đặt | `/patient/settings` | patient | Cập nhật hồ sơ |
-| BS Dashboard | `/doctor` | doctor | Hàng chờ duyệt |
-| BN của BS | `/doctor/patients` | doctor | Danh sách BN gán |
-| Chấm điểm | `/doctor/reviews/:id` | doctor | Duyệt section → finalize |
+| BS Dashboard | `/clinician` | doctor | Hàng chờ duyệt |
+| BN của BS | `/clinician/patients` | doctor | Danh sách BN gán |
+| Chấm điểm | `/clinician/reviews/:id` | doctor | Duyệt section → finalize |
 | Admin Dashboard | `/admin` | admin | Tổng quan |
-| Quản lý BS | `/admin/doctors` | admin | List / thêm BS / Show Information of doctor |
+| Quản lý BS | `/admin/clinicians` | admin | List / thêm BS / Show Information of doctor |
 
 ---
 
@@ -94,7 +94,7 @@ Integration: [`docs/stitch-integration.md`](docs/stitch-integration.md)
 | Làm test MoCA | `/patient/test` | primary | Bài kiểm tra 9 phần |
 | Kết quả | `/patient/results` | secondary | Điểm tạm & chính thức |
 | Lịch khám | `/patient/appointments` | surface-high | Lịch hẹn sắp tới |
-| Đổi bác sĩ | `/patient/doctors` | surface-high | Bác sĩ phụ trách |
+| Đổi bác sĩ | `/patient/clinicians` | surface-high | Bác sĩ phụ trách |
 
 - `fitViewport`: không scroll main khi đủ chỗ
 - **Dev only:** dòng health API — ẩn khi `import.meta.env.PROD`
@@ -135,7 +135,7 @@ Integration: [`docs/stitch-integration.md`](docs/stitch-integration.md)
 | Tab | Route | Label (VI) |
 |-----|-------|------------|
 | Home | `/patient` | **Trang chủ** (không "Assessment") |
-| Bác sĩ | `/patient/doctors` | Bác sĩ |
+| Bác sĩ | `/patient/clinicians` | Bác sĩ |
 | Kết quả | `/patient/results` | Kết quả |
 | — | logout | Thoát |
 
@@ -161,7 +161,7 @@ Lịch khám: chỉ từ home grid (không tab bottom).
 
 ---
 
-### `/doctor` — Dashboard
+### `/clinician` — Dashboard
 
 **One job:** thấy hàng chờ review nhanh.  
 **Layout:** queue list + link patients.  
@@ -169,7 +169,7 @@ Lịch khám: chỉ từ home grid (không tab bottom).
 
 ---
 
-### `/doctor/reviews/:id` — Chấm điểm
+### `/clinician/reviews/:id` — Chấm điểm
 
 **Layout:** patient info · section scores · drawing/audio preview · finalize CTA.
 

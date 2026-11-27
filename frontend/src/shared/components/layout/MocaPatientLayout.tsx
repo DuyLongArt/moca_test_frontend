@@ -30,6 +30,7 @@ export function MocaPatientLayout({
       <MocaAppHeader title={title} />
       <main
         id="main-content"
+        tabIndex={-1}
         className={[
           'app-shell__main px-[var(--stitch-margin-mobile)] py-4',
           'pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:pb-4',

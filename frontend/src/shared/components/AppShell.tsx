@@ -80,6 +80,7 @@ export function AppShell({
       </header>
       <main
         id="main-content"
+        tabIndex={-1}
         className={[
           'app-shell__main mx-auto w-full max-w-5xl px-4 py-4',
           fitViewport ? 'app-shell__main--center' : '',

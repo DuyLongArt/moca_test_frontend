@@ -1,6 +1,6 @@
 # MoCA Platform — Frontend
 
-React 19 + Vite + TypeScript. Glass Editorial UI.
+React 19 + Vite + TypeScript. Clinical minimal UI.
 
 ## Quick start
 
