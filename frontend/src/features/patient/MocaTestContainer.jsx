@@ -84,6 +84,8 @@ function useSpeech(lang = "vi-VN") {
   // so the UI can warn caregivers if the OS has none available.
   const [vietnameseVoiceAvailable, setVietnameseVoiceAvailable] = useState(true);
   const viVoiceRef = useRef(null);
+  const timersRef = useRef([]);
+  const runIdRef = useRef(0);
 
   // (Re)load the system voice list and resolve the best Vietnamese voice.
   const loadVoices = useCallback(() => {
@@ -116,6 +118,9 @@ function useSpeech(lang = "vi-VN") {
   }, [supported, loadVoices]);
 
   const cancel = useCallback(() => {
+    runIdRef.current += 1;
+    timersRef.current.forEach((id) => window.clearTimeout(id));
+    timersRef.current = [];
     if (!supported) return;
     try {
       window.speechSynthesis.cancel();
@@ -128,6 +133,7 @@ function useSpeech(lang = "vi-VN") {
     (input, rate = 0.9) => {
       if (!supported) return;
       cancel();
+      const runId = runIdRef.current;
       // Voices may not have loaded on the very first interaction — try once more.
       if (!viVoiceRef.current) loadVoices();
 
@@ -136,12 +142,14 @@ function useSpeech(lang = "vi-VN") {
         : [{ text: String(input), delayBeforeMs: 0 }];
 
       const runItem = (idx) => {
+        if (runIdRef.current !== runId) return;
         if (idx >= items.length) {
           setSpeaking(false);
           return;
         }
         const { text, delayBeforeMs = 0 } = items[idx];
         const fire = () => {
+          if (runIdRef.current !== runId) return;
           const u = new SpeechSynthesisUtterance(text);
           // Primary: assign the resolved native Vietnamese voice if present.
           if (viVoiceRef.current) u.voice = viVoiceRef.current;
@@ -156,8 +164,13 @@ function useSpeech(lang = "vi-VN") {
             runItem(idx + 1);
           }
         };
-        if (delayBeforeMs > 0) setTimeout(fire, delayBeforeMs);
-        else fire();
+        if (delayBeforeMs > 0) {
+          const timer = window.setTimeout(() => {
+            timersRef.current = timersRef.current.filter((id) => id !== timer);
+            fire();
+          }, delayBeforeMs);
+          timersRef.current.push(timer);
+        } else fire();
       };
 
       setSpeaking(true);
@@ -1202,9 +1215,6 @@ function Section4Attention({ speech, answers, setAnswer, onNext, onBack, enterFr
                     <Volume2 size={14} /> Nghe dãy số
                   </button>
                 </div>
-                <div className="rounded-2xl bg-gray-50 border border-gray-200 px-4 py-3 mb-3 text-center font-mono text-xl font-bold text-gray-900 spacing-loose">
-                  {ATTENTION.digitsForward.join("  —  ")}
-                </div>
                 <TextFieldWithRecording
                   value={fwd}
                   inputMode="numeric"
@@ -1225,9 +1235,6 @@ function Section4Attention({ speech, answers, setAnswer, onNext, onBack, enterFr
                   >
                     <Volume2 size={14} /> Nghe dãy số
                   </button>
-                </div>
-                <div className="rounded-2xl bg-gray-50 border border-gray-200 px-4 py-3 mb-3 text-center font-mono text-xl font-bold text-gray-900">
-                  {ATTENTION.digitsBackwardRead.join("  —  ")}
                 </div>
                 <TextFieldWithRecording
                   value={bwd}
