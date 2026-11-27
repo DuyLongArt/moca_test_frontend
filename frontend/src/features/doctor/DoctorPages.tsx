@@ -39,6 +39,7 @@ export function DoctorDashboardPage() {
           </p>
           <button
             type="button"
+            aria-pressed={aiOn}
             onClick={() => setAiOn(!aiOn)}
             className="mt-1 flex items-center gap-2 text-lg font-bold text-amber-700"
           >
@@ -53,7 +54,16 @@ export function DoctorDashboardPage() {
         Hàng chờ chấm điểm
       </h2>
 
-      <QueryState isLoading={isLoading} error={error} isEmpty={reviews.length === 0}>
+      <QueryState
+        isLoading={isLoading}
+        error={error}
+        isEmpty={reviews.length === 0}
+        empty={
+          <p className="py-8 text-center text-sm text-slate-500">
+            Không có bài nào chờ duyệt.
+          </p>
+        }
+      >
         <div className="space-y-2">
           {reviews.map((item) => (
             <GlassCard
@@ -90,7 +100,16 @@ export function DoctorPatientsPage() {
         <Users size={18} />
         <span>Danh sách bệnh nhân được gán cho bạn</span>
       </div>
-      <QueryState isLoading={isLoading} error={error}>
+      <QueryState
+        isLoading={isLoading}
+        error={error}
+        isEmpty={patients.length === 0}
+        empty={
+          <p className="py-8 text-center text-sm text-slate-500">
+            Chưa có bệnh nhân được gán cho bạn.
+          </p>
+        }
+      >
         <div className="space-y-3">
           {patients.map((p) => (
             <GlassCard key={p.id}>

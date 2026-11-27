@@ -52,6 +52,9 @@ export function useApproveReview(sessionId: string) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.doctor.reviews(doctorId ?? ''),
       })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.doctor.patients(doctorId ?? ''),
+      })
     },
   })
 }

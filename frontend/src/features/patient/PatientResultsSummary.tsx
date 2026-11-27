@@ -1,91 +1,9 @@
 import { useRef, useState } from 'react'
 import { jsPDF } from 'jspdf'
 import html2canvas from 'html2canvas-pro'
-import {
-  AlertTriangle,
-  CheckCircle2,
-  Clock,
-  Compass,
-  FileDown,
-  Languages,
-  Layers,
-  MemoryStick,
-  PenLine,
-  Shapes,
-  Tag,
-} from 'lucide-react'
+import { AlertTriangle, CheckCircle2, FileDown } from 'lucide-react'
 import type { TestSessionSummary } from '../../shared/types/session'
 import { formatDateVi } from '../../shared/utils/format'
-
-type SectionScore = {
-  id: string
-  label: string
-  score: string
-  note: string
-  icon: typeof PenLine
-  highlight?: boolean
-}
-
-const DEFAULT_SECTIONS: SectionScore[] = [
-  {
-    id: 'visuospatial',
-    label: 'Thị giác – không gian',
-    score: '5/5',
-    note: 'Nối theo mẫu, vẽ khối, vẽ đồng hồ.',
-    icon: PenLine,
-  },
-  {
-    id: 'naming',
-    label: 'Gọi tên con vật',
-    score: '3/3',
-    note: 'Sư tử, tê giác, lạc đà.',
-    icon: Tag,
-  },
-  {
-    id: 'memory',
-    label: 'Trí nhớ (ghi nhận)',
-    score: '—',
-    note: 'Ghi nhận tức thì (không tính điểm).',
-    icon: MemoryStick,
-  },
-  {
-    id: 'attention',
-    label: 'Sự chú ý',
-    score: '5/6',
-    note: 'Sai dãy số đọc ngược.',
-    icon: Layers,
-    highlight: true,
-  },
-  {
-    id: 'language',
-    label: 'Ngôn ngữ',
-    score: '3/3',
-    note: 'Nhắc lại câu và sự lưu loát.',
-    icon: Languages,
-  },
-  {
-    id: 'abstraction',
-    label: 'Tư duy trừu tượng',
-    score: '2/2',
-    note: 'Tìm điểm giống nhau giữa các vật.',
-    icon: Shapes,
-  },
-  {
-    id: 'delayed',
-    label: 'Nhớ lại có trì hoãn',
-    score: '4/5',
-    note: 'Không nhớ «Vải nhung» khi không gợi ý.',
-    icon: Clock,
-    highlight: true,
-  },
-  {
-    id: 'orientation',
-    label: 'Định hướng',
-    score: '6/6',
-    note: 'Ngày, tháng, năm, thứ, địa điểm, thành phố.',
-    icon: Compass,
-  },
-]
 
 type Props = {
   session: TestSessionSummary
@@ -180,9 +98,18 @@ export function PatientResultsSummary({
               <span>Thang điểm</span>
               <span>≥26 Bình thường</span>
             </div>
-            <div className="flex h-2 w-full overflow-hidden rounded-full bg-surface-container">
-              <div className="h-full bg-error" style={{ width: '60%' }} />
-              <div className="h-full bg-primary" style={{ width: '40%' }} />
+            <div
+              className="flex h-2 w-full overflow-hidden rounded-full bg-surface-container"
+              role="progressbar"
+              aria-label="Điểm MoCA"
+              aria-valuenow={score}
+              aria-valuemin={0}
+              aria-valuemax={30}
+            >
+              <div
+                className="h-full bg-primary"
+                style={{ width: `${(score / 30) * 100}%` }}
+              />
             </div>
           </div>
         </div>
@@ -205,52 +132,6 @@ export function PatientResultsSummary({
           </div>
         </div>
       </section>
-
-      {/* Category breakdown — horizontal scroll on mobile */}
-      {!isPending && (
-        <section className="space-y-2">
-          <h2 className="text-base font-semibold text-on-surface">Phân tích theo phần</h2>
-          <div className="flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory">
-            {DEFAULT_SECTIONS.map((cat) => {
-              const Icon = cat.icon
-              return (
-                <div
-                  key={cat.id}
-                  className={[
-                    'w-36 shrink-0 snap-start rounded-xl border bg-surface-container-lowest p-3',
-                    cat.highlight
-                      ? 'border-primary ring-1 ring-primary/20'
-                      : 'border-outline-variant',
-                  ].join(' ')}
-                >
-                  <div className="mb-2 flex items-start justify-between">
-                    <div
-                      className={[
-                        'rounded-lg p-1.5',
-                        cat.highlight
-                          ? 'bg-primary text-on-primary'
-                          : 'bg-primary-fixed text-on-primary-fixed-variant',
-                      ].join(' ')}
-                    >
-                      <Icon size={16} />
-                    </div>
-                    <span className="text-sm font-bold">{cat.score}</span>
-                  </div>
-                  <p className="text-xs font-semibold leading-tight">{cat.label}</p>
-                  <p
-                    className={[
-                      'mt-0.5 line-clamp-2 text-[10px]',
-                      cat.highlight ? 'text-error' : 'text-outline',
-                    ].join(' ')}
-                  >
-                    {cat.note}
-                  </p>
-                </div>
-              )
-            })}
-          </div>
-        </section>
-      )}
 
       {/* Actions */}
       {!isPending && (

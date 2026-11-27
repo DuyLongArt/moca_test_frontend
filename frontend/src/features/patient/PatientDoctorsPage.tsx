@@ -12,7 +12,16 @@ export function PatientDoctorsPage() {
       <p className="mb-3 shrink-0 text-sm text-on-surface-variant">
         Chọn bác sĩ phụ trách theo dõi kết quả MoCA của bạn.
       </p>
-      <QueryState isLoading={isLoading} error={error}>
+      <QueryState
+        isLoading={isLoading}
+        error={error}
+        isEmpty={doctors.length === 0}
+        empty={
+          <p className="py-8 text-center text-sm text-on-surface-variant">
+            Chưa có bác sĩ để lựa chọn.
+          </p>
+        }
+      >
         <div className="space-y-3">
           {doctors.map((d) => (
             <div
