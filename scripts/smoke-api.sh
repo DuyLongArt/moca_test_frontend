@@ -35,6 +35,8 @@ check "GET /api/v1/doctors/list" 200 "$(status "$BASE/api/v1/doctors/list")"
 check "GET /api/v1/doctor/list?id=1" 200 "$(status "$BASE/api/v1/doctor/list?id=1")"
 check "GET /error (blocked)" 404 "$(status "$BASE/error")"
 check "GET /internal/d1/query (blocked)" 404 "$(status "$BASE/internal/d1/query")"
+check "POST /internal/d1/query (unauthorized)" 401 \
+  "$(post_status /internal/d1/query '{"sql":"SELECT 1"}')"
 check "POST /api/v1/auth/patient/login (no password)" 400 \
   "$(post_status /api/v1/auth/patient/login '{"phone_number":"0123456789"}')"
 check "POST /api/v1/auth/patient/status (bad phone)" 400 \

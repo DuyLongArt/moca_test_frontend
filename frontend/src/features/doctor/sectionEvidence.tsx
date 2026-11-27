@@ -127,7 +127,7 @@ function LanguageEvidence({ raw }: { raw: RawAnswers }) {
         />
       ))}
       <EvidenceRow
-        label="Lưu loát (chữ F)"
+        label="Lưu loát"
         value={
           fluencyText
             ? `"${fluencyText}" (${textOf(fluency?.count) || '0'} từ hợp lệ)`

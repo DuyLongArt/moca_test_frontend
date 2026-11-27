@@ -44,7 +44,6 @@ export function LandingPage() {
   const mainRef = useRef<HTMLElement>(null)
 
   const phoneCheck = validateVnPhone(phone)
-  const phoneReady = phoneCheck.ok
 
   const openPhoneSheet = () => {
     setPhoneOpen(true)
@@ -339,7 +338,7 @@ export function LandingPage() {
             )}
             <button
               type="submit"
-              disabled={submitting || !phoneReady || password.length < 8}
+              disabled={submitting}
               className="mt-5 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary text-base font-bold text-on-primary disabled:opacity-60"
             >
               {submitting ? 'Đang xử lý…' : 'Bắt đầu đánh giá'}

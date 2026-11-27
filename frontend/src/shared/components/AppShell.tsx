@@ -25,6 +25,12 @@ export function AppShell({
 
   return (
     <div className="app-shell bg-[var(--stitch-background)]">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:rounded-xl focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-slate-900"
+      >
+        Đi đến nội dung chính
+      </a>
       <header className="shrink-0 border-b border-white/50 bg-white/60 backdrop-blur-lg">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
           <div>
@@ -72,6 +78,7 @@ export function AppShell({
         )}
       </header>
       <main
+        id="main-content"
         className={[
           'app-shell__main mx-auto w-full max-w-5xl px-4 py-4',
           fitViewport ? 'app-shell__main--center' : '',

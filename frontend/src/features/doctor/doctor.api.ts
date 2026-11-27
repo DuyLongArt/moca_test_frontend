@@ -330,7 +330,7 @@ export async function approveReview(
     const bonus = detail.educationBonus ?? 0
     detail.finalScore = Math.min(30, doctorTotal + bonus)
     detail.status = 'FINALIZED'
-    detail.classification = doctorTotal >= 26
+    detail.classification = detail.finalScore >= 26
       ? 'Nhận thức bình thường'
       : 'Dưới ngưỡng bình thường'
     for (const s of payload.scores) {
