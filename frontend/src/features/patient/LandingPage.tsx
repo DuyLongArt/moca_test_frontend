@@ -153,6 +153,14 @@ export function LandingPage() {
           <p className="mt-3 max-w-xl text-base leading-relaxed text-on-surface-variant">
             Làm bài kiểm tra tại nhà — miễn phí, kết quả do bác sĩ chấm.
           </p>
+          <div className="mt-5 flex flex-wrap gap-2">
+            <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1.5 text-sm font-semibold text-primary">
+              {steps.length} bước đơn giản
+            </span>
+            <span className="inline-flex items-center rounded-full bg-amber-100 px-3 py-1.5 text-sm font-semibold text-amber-900">
+              Miễn phí · bác sĩ chấm
+            </span>
+          </div>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:max-w-md">
             <button
               type="button"
