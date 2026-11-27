@@ -9,7 +9,7 @@ type Props = {
   title?: string
 }
 
-export function MocaAppHeader({ title = 'MoCA Assessment' }: Props) {
+export function MocaAppHeader({ title = 'Đánh giá MoCA' }: Props) {
   const logout = useAuthStore((s) => s.logout)
   const navigate = useNavigate()
 

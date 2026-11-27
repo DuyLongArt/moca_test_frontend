@@ -175,7 +175,7 @@ function useSpeech(lang = "vi-VN") {
    ========================================================================== */
 function ProgressBar({ value, currentStep, totalSteps = 9 }) {
   return (
-    <header className="moca-progress" role="progressbar" aria-valuenow={currentStep} aria-valuemin={1} aria-valuemax={totalSteps}>
+    <header className="moca-progress" role="progressbar" aria-label="Tiến độ bài kiểm tra" aria-valuenow={currentStep} aria-valuemin={1} aria-valuemax={totalSteps}>
       <p className="moca-progress__label">
         Phần {currentStep} trên {totalSteps}
       </p>
@@ -1852,13 +1852,13 @@ function ResultsSummary({ set, answers, profile, onRestart, submitStatus, onRetr
           ))}
         </div>
 
-        <div className="mt-6 rounded-2xl bg-[var(--moca-fill)] px-4 py-3.5 text-base text-[var(--moca-muted)] leading-relaxed">
+        <div role="status" aria-live="polite" className="mt-6 rounded-2xl bg-[var(--moca-fill)] px-4 py-3.5 text-base text-[var(--moca-muted)] leading-relaxed">
           {submitStatus === "idle" && "Đang chuẩn bị gửi bài làm…"}
           {submitStatus === "pending" && "Đang gửi bài làm…"}
           {submitStatus === "success" && "Bài làm đã gửi · chờ bác sĩ duyệt."}
           {submitStatus === "error" && (
             <span className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <span className="text-[#b91c1c]">Không gửi được — kiểm tra kết nối máy chủ.</span>
+              <span role="alert" className="text-[#b91c1c]">Không gửi được — kiểm tra kết nối máy chủ.</span>
               <button
                 type="button"
                 onClick={onRetrySubmit}
@@ -1902,16 +1902,18 @@ function StartScreen({ profile, setProfile, onStart, onHome }) {
 
         <div className="space-y-4">
           <div>
-            <label className="moca-label">Họ và tên</label>
+            <label className="moca-label" htmlFor="moca-patient-name">Họ và tên</label>
             <TextField
+              id="moca-patient-name"
               value={profile.patient_name}
               onChange={(e) => setProfile({ ...profile, patient_name: e.target.value })}
               placeholder="Nguyễn Văn A"
             />
           </div>
           <div>
-            <label className="moca-label">Số năm đi học</label>
+            <label className="moca-label" htmlFor="moca-education-years">Số năm đi học</label>
             <TextField
+              id="moca-education-years"
               type="number"
               inputMode="numeric"
               value={profile.education_years}
