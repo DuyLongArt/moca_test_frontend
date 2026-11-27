@@ -1,5 +1,6 @@
 import { Loader2 } from 'lucide-react'
 import type { ReactNode } from 'react'
+import { getApiErrorMessage } from '../utils/apiError'
 
 type Props = {
   isLoading: boolean
@@ -29,7 +30,7 @@ export function QueryState({ isLoading, error, children, empty, isEmpty }: Props
         role="alert"
         className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
       >
-        Không tải được dữ liệu: {error.message}
+        Không tải được dữ liệu: {getApiErrorMessage(error, 'Vui lòng thử lại sau.')}
       </div>
     )
   }

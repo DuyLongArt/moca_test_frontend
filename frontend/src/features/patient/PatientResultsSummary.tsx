@@ -15,6 +15,7 @@ export function PatientResultsSummary({
   const score = session.finalScore ?? session.provisionalScore ?? 0
   const isNormal = score >= 26
   const isPending = session.status === 'PENDING_REVIEW'
+  const progressWidth = Math.min(100, Math.max(0, (score / 30) * 100))
 
   const rootRef = useRef<HTMLDivElement>(null)
   const [exporting, setExporting] = useState(false)
@@ -112,10 +113,11 @@ export function PatientResultsSummary({
               aria-valuenow={score}
               aria-valuemin={0}
               aria-valuemax={30}
+              aria-valuetext={isPending ? `${score}/30, chờ bác sĩ duyệt` : `${score}/30 điểm`}
             >
               <div
                 className="h-full bg-primary"
-                style={{ width: `${(score / 30) * 100}%` }}
+                style={{ width: `${progressWidth}%` }}
               />
             </div>
           </div>

@@ -123,6 +123,9 @@ export function LandingPage() {
         <button
           type="button"
           onClick={() => setMenuOpen((v) => !v)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setMenuOpen(false)
+          }}
           className="flex h-10 w-10 items-center justify-center rounded-xl text-on-surface-variant hover:bg-surface-container-low"
           aria-label="Menu"
           aria-expanded={menuOpen}
