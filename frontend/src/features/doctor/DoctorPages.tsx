@@ -1,10 +1,9 @@
-import { AlertCircle, Sparkles, Users } from 'lucide-react'
+import { AlertCircle, Users } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { AppShell } from '../../shared/components/AppShell'
 import { GlassCard } from '../../shared/components/GlassCard'
 import { QueryState } from '../../shared/components/QueryState'
 import { formatDateVi } from '../../shared/utils/format'
-import { useUiStore } from '../../stores/uiStore'
 import { useDoctorPatients, useDoctorReviews } from './useDoctorQueries'
 
 const DOCTOR_NAV = [
@@ -15,12 +14,10 @@ const DOCTOR_NAV = [
 export function DoctorDashboardPage() {
   const { data: reviews = [], isLoading, error } = useDoctorReviews()
   const { data: patients = [] } = useDoctorPatients()
-  const aiOn = useUiStore((s) => s.doctorAiAssist)
-  const setAiOn = useUiStore((s) => s.setDoctorAiAssist)
 
   return (
     <AppShell title="Bác sĩ" nav={DOCTOR_NAV}>
-      <div className="mb-4 grid shrink-0 gap-3 sm:grid-cols-3">
+      <div className="mb-4 grid shrink-0 gap-3 sm:grid-cols-2">
         <GlassCard>
           <p className="text-sm text-slate-500">Chờ duyệt</p>
           <p className="text-3xl font-bold text-amber-600">{reviews.length}</p>
@@ -28,24 +25,6 @@ export function DoctorDashboardPage() {
         <GlassCard>
           <p className="text-sm text-slate-500">Bệnh nhân</p>
           <p className="text-3xl font-bold text-blue-600">{patients.length}</p>
-        </GlassCard>
-        {/* Amber/yellow = AI assist (same convention as DoctorReviewPage) */}
-        <GlassCard>
-          <p className="text-sm text-slate-500">
-            <span className="mr-1.5 rounded-md bg-amber-200 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-900">
-              AI
-            </span>
-            hỗ trợ
-          </p>
-          <button
-            type="button"
-            aria-pressed={aiOn}
-            onClick={() => setAiOn(!aiOn)}
-            className="mt-1 flex items-center gap-2 text-lg font-bold text-amber-700"
-          >
-            <Sparkles size={20} className="text-amber-600" />
-            {aiOn ? 'Bật' : 'Tắt'}
-          </button>
         </GlassCard>
       </div>
 

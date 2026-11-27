@@ -43,15 +43,6 @@ export function AdminDoctorsPage() {
 
   return (
     <AppShell title="Quản lý bác sĩ" nav={ADMIN_NAV}>
-      <button
-        type="button"
-        disabled
-        title="Tính năng đang phát triển"
-        className="mb-6 inline-flex cursor-not-allowed items-center gap-2 rounded-2xl bg-slate-300 px-4 py-3 font-bold text-slate-600"
-      >
-        <Plus size={18} />
-        Thêm bác sĩ
-      </button>
       <QueryState isLoading={isLoading} error={error}>
         <div className="space-y-3">
           {doctors.map((d) => (
