@@ -112,7 +112,15 @@ export function LandingPage() {
     <div className="app-shell elderly-layout bg-background text-on-background">
       {/* ── HEADER ── */}
       <header className="relative z-40 flex h-28 shrink-0 items-center justify-between border-b border-outline-variant bg-surface px-[var(--stitch-margin-mobile)]">
-        <img src="/moca-viet-logo.png" alt="MoCA Việt" className="h-20 w-auto object-contain" />
+        <img
+          src="/moca-viet-logo.png"
+          alt="MoCA Việt"
+          width={1024}
+          height={1024}
+          fetchPriority="high"
+          decoding="async"
+          className="h-20 w-auto object-contain"
+        />
         <button
           type="button"
           onClick={() => setMenuOpen((v) => !v)}
