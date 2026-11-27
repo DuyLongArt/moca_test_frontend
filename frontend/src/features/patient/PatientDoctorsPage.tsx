@@ -7,6 +7,7 @@ import { useDoctorOptions, usePickClinician } from './usePatientQueries'
 export function PatientDoctorsPage() {
   const { data: doctors = [], isLoading, error } = useDoctorOptions()
   const pickClinician = usePickClinician()
+  const pickingId = pickClinician.isPending ? pickClinician.variables : null
 
   return (
     <MocaPatientLayout title="Bác sĩ của tôi">
@@ -94,11 +95,12 @@ export function PatientDoctorsPage() {
                 ) : (
                   <button
                     type="button"
-                    disabled={pickClinician.isPending}
+                    disabled={pickingId !== null}
+                    aria-busy={pickingId === d.id}
                     onClick={() => pickClinician.mutate(d.id)}
                     className="min-h-12 w-full rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary hover:opacity-90 disabled:opacity-50"
                   >
-                    {pickClinician.isPending ? 'Đang chọn…' : 'Chọn bác sĩ này'}
+                    {pickingId === d.id ? 'Đang chọn…' : 'Chọn bác sĩ này'}
                   </button>
                 )}
               </div>

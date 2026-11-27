@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom'
 import { AppShell } from '../../shared/components/AppShell'
 import { GlassCard } from '../../shared/components/GlassCard'
 import { api } from '../../shared/lib/axios'
+import { getApiErrorMessage } from '../../shared/utils/apiError'
 import { formatDateTimeVi } from '../../shared/utils/format'
 import { useApproveReview, useSessionDetail } from './useDoctorQueries'
 import type { SectionScore } from './doctor.api'
@@ -199,9 +200,10 @@ function SectionReviewCard({
           <div className="mt-2 flex items-center gap-3">
             <button
               type="button"
-              aria-label="Giảm điểm"
+              aria-label={`Giảm điểm ${section.label}`}
+              disabled={displayValue <= 0}
               onClick={() => bump(-1)}
-              className="flex h-12 w-12 items-center justify-center rounded-xl border border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50"
+              className="flex h-12 w-12 items-center justify-center rounded-xl border border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Minus size={18} />
             </button>
@@ -210,9 +212,10 @@ function SectionReviewCard({
             </span>
             <button
               type="button"
-              aria-label="Tăng điểm"
+              aria-label={`Tăng điểm ${section.label}`}
+              disabled={displayValue >= section.maxPoints}
               onClick={() => bump(1)}
-              className="flex h-12 w-12 items-center justify-center rounded-xl border border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50"
+              className="flex h-12 w-12 items-center justify-center rounded-xl border border-emerald-200 bg-white text-emerald-800 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Plus size={18} />
             </button>
@@ -266,9 +269,11 @@ function ScoreOverviewBar({
       <div
         className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200"
         role="progressbar"
+        aria-label="Tổng điểm chấm"
         aria-valuenow={total}
         aria-valuemin={0}
         aria-valuemax={30}
+        aria-valuetext={`${total}/30 điểm`}
       >
         <div
           className="h-full rounded-full bg-blue-600 transition-all"
@@ -406,7 +411,11 @@ export function DoctorReviewPage() {
         )}
 
         {approveMutation.isSuccess && (
-          <div className="mt-4 rounded-2xl bg-green-50 p-4 text-sm text-green-800">
+          <div
+            role="status"
+            aria-live="polite"
+            className="mt-4 rounded-2xl bg-green-50 p-4 text-sm text-green-800"
+          >
             Đã duyệt thành công! Điểm chính thức: {session.finalScore}/30.
             <Link
               to="/clinician"
@@ -418,8 +427,11 @@ export function DoctorReviewPage() {
         )}
 
         {approveMutation.isError && (
-          <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-            Không duyệt được: {(approveMutation.error as Error)?.message ?? 'Lỗi máy chủ'}
+          <div
+            role="alert"
+            className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+          >
+            Không duyệt được: {getApiErrorMessage(approveMutation.error, 'Lỗi máy chủ')}
           </div>
         )}
       </div>
