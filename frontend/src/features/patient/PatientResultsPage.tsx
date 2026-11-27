@@ -57,7 +57,15 @@ export function PatientResultsPage() {
         isLoading={isLoading}
         error={error}
         isEmpty={filtered.length === 0}
-        empty={<EmptyTestsState />}
+        empty={
+          data.length === 0 ? (
+            <EmptyTestsState />
+          ) : (
+            <p className="py-8 text-center text-sm text-on-surface-variant">
+              Không có bài nào theo bộ lọc này. Chọn “Tất cả” để xem lại.
+            </p>
+          )
+        }
       >
         {activeSession && (
           <>

@@ -24,7 +24,9 @@ export function DoctorDashboardPage() {
       <div className="mb-4 grid shrink-0 gap-3 sm:grid-cols-2">
         <GlassCard>
           <p className="text-sm text-slate-500">Chờ duyệt</p>
-          <p className="text-3xl font-bold text-amber-600">{reviews.length}</p>
+          <p className="text-3xl font-bold text-amber-600">
+            {isLoading ? '…' : error ? '—' : reviews.length}
+          </p>
         </GlassCard>
         <GlassCard>
           <p className="text-sm text-slate-500">Bệnh nhân</p>

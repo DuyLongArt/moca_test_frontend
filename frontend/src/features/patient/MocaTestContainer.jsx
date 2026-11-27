@@ -255,7 +255,7 @@ function TextField(props) {
   return <input {...props} className={"moca-field " + (props.className || "")} />;
 }
 
-function TextFieldWithRecording({ value, onChange, placeholder, label, inputMode, type, recordingKey, recordingValue, onRecordingSaved }) {
+function TextFieldWithRecording({ value, onChange, placeholder, label, inputMode, type, recordingValue, onRecordingSaved }) {
   return (
     <div className="flex gap-2 items-start">
       <TextField
@@ -1541,7 +1541,9 @@ function Section8Recall({ set, speech, answers, setAnswer, onNext, onBack, secti
           <div className="mt-6 h-3 w-full rounded-full bg-gray-200 overflow-hidden">
             <div
               className="h-full bg-blue-600 transition-[width] duration-1000"
-              style={{ width: `${(elapsed / DELAY_LOCK_SECONDS) * 100}%` }}
+              style={{
+                width: `${Math.min(100, Math.max(0, (elapsed / DELAY_LOCK_SECONDS) * 100))}%`,
+              }}
             />
           </div>
         </div>

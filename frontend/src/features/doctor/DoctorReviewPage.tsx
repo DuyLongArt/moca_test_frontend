@@ -322,7 +322,8 @@ export function DoctorReviewPage() {
     return (
       <AppShell title="Chấm điểm bài làm" nav={DOCTOR_NAV}>
         <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-          Không tải được dữ liệu: {error?.message ?? 'Không tìm thấy phiên làm bài'}
+          Không tải được dữ liệu:{' '}
+          {getApiErrorMessage(error, 'Không tìm thấy phiên làm bài')}
         </div>
       </AppShell>
     )
@@ -416,7 +417,8 @@ export function DoctorReviewPage() {
             aria-live="polite"
             className="mt-4 rounded-2xl bg-green-50 p-4 text-sm text-green-800"
           >
-            Đã duyệt thành công! Điểm chính thức: {session.finalScore}/30.
+            Đã duyệt thành công! Điểm chính thức:{' '}
+            {approveMutation.data?.finalScore ?? session.finalScore ?? '—'}/30.
             <Link
               to="/clinician"
               className="ml-2 font-semibold text-green-900 underline"
