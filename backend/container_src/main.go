@@ -23,17 +23,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hi, I'm a container and this is my message: \"%s\", my instance ID is: %s", message, instanceID)
 }
 
-func errorHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("Exiting with code 1 for the /error demonstration")
-	os.Exit(1)
-}
-
 func newRouter(app *infas.DB_connection) http.Handler {
 
 	router := http.NewServeMux()
-	router.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	healthHandler := func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-	})
+	}
+	router.HandleFunc("/health", healthHandler)
+	router.HandleFunc("/api/v1/health", healthHandler)
 	router.HandleFunc("/", handler)
 	router.HandleFunc("/container", handler)
 	router.HandleFunc("/api/v1/auth/patient/login", usecase.PatientHandler(app))
@@ -47,7 +44,9 @@ func newRouter(app *infas.DB_connection) http.Handler {
 	router.HandleFunc("/api/v1/doctors/list", usecase.DoctorsListHandler(app))
 	router.HandleFunc("/api/v1/test/grade", usecase.GradeTestHandler(app))
 	router.HandleFunc("/api/v1/test/update", usecase.UpdatePatientScoreHandler(app))
-	router.HandleFunc("/error", errorHandler)
+	router.HandleFunc("/error", func(w http.ResponseWriter, r *http.Request) {
+		http.NotFound(w, r)
+	})
 
 	return router
 }

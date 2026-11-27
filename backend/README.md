@@ -33,25 +33,24 @@ Open [http://localhost:8787](http://localhost:8787) to see the available endpoin
 
 ## Try the routes
 
-| Route            | Behavior                                                                                            |
-| ---------------- | --------------------------------------------------------------------------------------------------- |
-| `/`              | List the available endpoints without starting a container.                                          |
-| `/container/one` | Start or reuse the named instance `one`. Change the final path segment to use a different instance. |
-| `/singleton`     | Route every request to the same shared instance.                                                    |
-| `/lb`            | Randomly select one of three named instances. This is a fixed pool.                                 |
-| `/error`         | Stop a dedicated test instance with exit code 1. The Worker returns HTTP 502 and logs the failure.  |
+| Route                        | Behavior                                                                |
+| ---------------------------- | ----------------------------------------------------------------------- |
+| `/api/health`                | Worker health check; does not start a container.                        |
+| `/api/v1/health`             | Container readiness probe through the shared instance.                  |
+| `/api/v1/auth/*`             | Patient and doctor login, signup, status and password reset.            |
+| `/api/v1/doctor/list`        | Doctor patient list.                                                    |
+| `/api/v1/test/*`             | Grade and update patient assessments.                                   |
+| `/internal/*` and `/error`   | Blocked by the Worker; never forwarded to the container.                |
 
 ```bash
-curl http://localhost:8787/container/one
-curl http://localhost:8787/container/two
-curl http://localhost:8787/singleton
-curl http://localhost:8787/lb
+curl http://localhost:8787/api/health
+curl http://localhost:8787/api/v1/health
 curl -i http://localhost:8787/error
 ```
 
-Successful container responses include the startup message and Durable Object ID. The Worker passes its ID through `INSTANCE_ID` so the output identifies each instance in both local development and deployed applications. Repeated requests for the same name reach the same Durable Object. A stopped container starts again on the next request; its local filesystem is not persistent application storage.
+`/api/v1/health` returns 200 when the container is ready. The Worker passes its ID through `INSTANCE_ID` so the container can identify the instance. Requests for application routes reach one shared container; a stopped container starts again on the next request. Its local filesystem is not persistent application storage; application data lives in D1.
 
-The `/lb` pool has three names, but `/container/<ID>` can start additional instances. Add authentication and application-specific limits before exposing arbitrary instance creation to users. Running containers count toward your [account limits](https://developers.cloudflare.com/containers/platform/limits/#account-limits).
+Add authentication and application-specific limits before exposing arbitrary instance creation to users. Running containers count toward your [account limits](https://developers.cloudflare.com/containers/platform/limits/#account-limits).
 
 ## How it works
 
@@ -59,11 +58,11 @@ The `/lb` pool has three names, but `/container/<ID>` can start additional insta
 
 In `src/index.ts`, `MyContainer` extends `DurableObject` from `cloudflare:workers`. Its `fetch()` method:
 
-1. Starts the configured image with the `lite` instance size, outbound Internet access turned off, and `MESSAGE` and `INSTANCE_ID` environment variables.
-2. Waits for a successful response from `/health` on port 8080. Concurrent requests share this readiness check.
+1. Starts the configured image with the `standard-2` instance size, outbound Internet access, and `MESSAGE`, `INSTANCE_ID`, `DB_HOST` and `JWT_SECRET` environment variables.
+2. Waits for a successful response from `/api/v1/health` on port 8080. Concurrent requests share this readiness check.
 3. Forwards the incoming request to `ctx.container.getTcpPort(8080)`. Application requests are not automatically retried.
 
-`monitor()` logs successful exits and failures. The Durable Object restores monitoring and its two-minute inactivity timeout when it restarts with an existing container. A pending monitor can keep the Durable Object active for up to 15 minutes, so the inactivity timeout is **not** a two-minute deadline from the last HTTP request. See the [Container API lifecycle methods](https://developers.cloudflare.com/containers/api/durable-object-container/#monitor).
+`monitor()` logs successful exits and failures. The Durable Object restores monitoring and its ten-minute inactivity timeout when it restarts with an existing container. A pending monitor can keep the Durable Object active beyond the last HTTP request, so the inactivity timeout is **not** an exact deadline. See the [Container API lifecycle methods](https://developers.cloudflare.com/containers/api/durable-object-container/#monitor).
 
 Edit `container_src/main.go` to change the Go server and `src/index.ts` to change routing or startup options. Set runtime environment variables in `start({ env: { ... } })`. Keep secrets out of source code; use [Worker secrets](https://developers.cloudflare.com/workers/configuration/secrets/) when needed.
 
@@ -75,7 +74,7 @@ npm run check
 npm test
 ```
 
-The unit tests run the Worker code with mocked container boundaries, without Docker. To test the actual image, use `npm run dev` and the routes above. If Go is installed locally, run its handler and process-exit tests too:
+The unit tests run the Worker code with mocked container boundaries, without Docker. To test the actual image, use `npm run dev` and the routes above. If Go is installed locally, run its handler tests too:
 
 ```bash
 cd container_src

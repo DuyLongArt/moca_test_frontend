@@ -246,6 +246,13 @@ describe("Worker routes", () => {
 		expect(response.status).toBe(404);
 		expect(getByName).not.toHaveBeenCalled();
 	});
+
+	it("does not forward the container error route", async () => {
+		const { env, getByName } = createEnv();
+		const response = await worker.request("http://example.com/error", undefined, env);
+		expect(response.status).toBe(404);
+		expect(getByName).not.toHaveBeenCalled();
+	});
 });
 
 describe("Container lifecycle and proxy", () => {

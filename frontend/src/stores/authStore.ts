@@ -6,6 +6,7 @@ import {
   patientLogin as patientLoginApi,
   patientSignup as patientSignupApi,
 } from '../features/auth/auth.api'
+import { queryClient } from '../shared/lib/queryClient'
 
 export type UserRole = 'PATIENT' | 'DOCTOR' | 'ADMIN'
 
@@ -64,10 +65,14 @@ export const useAuthStore = create<AuthState>()(
       },
       doctorSignup: async (payload) => {
         const { user, accessToken } = await doctorSignupApi(payload)
-        set({ user, token: accessToken })
+        const token = accessToken || (await doctorLoginApi(payload.email, payload.password)).accessToken
+        set({ user, token })
       },
       updateUser: (user) => set({ user }),
-      logout: () => set({ user: null, token: null }),
+      logout: () => {
+        set({ user: null, token: null })
+        queryClient.clear()
+      },
     }),
     { name: 'moca-auth' },
   ),

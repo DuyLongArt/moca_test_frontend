@@ -308,7 +308,8 @@ app.post(FORGOT_PASSWORD_PATH, async (c) => {
 });
 
 app.all("*", (c) => {
-	if (new URL(c.req.url).pathname.startsWith("/internal/")) {
+	const pathname = new URL(c.req.url).pathname;
+	if (pathname.startsWith("/internal/") || pathname === "/error") {
 		return c.notFound();
 	}
 	return c.env.MY_CONTAINER.getByName(INSTANCE_NAME).fetch(c.req.raw);

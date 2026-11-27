@@ -131,9 +131,7 @@ func DoctorHandler(db_connector *infas.DB_connection) http.HandlerFunc {
 
 				// 2. Verify incoming plaintext password against the stored bcrypt hash
 				if err := bcrypt.CompareHashAndPassword([]byte(hash_password), []byte(request.Password)); err != nil {
-					// Password does not match
-					http.Error(w, "Update user account", http.StatusUnauthorized)
-					db_connector.UpsertDoctorAccount(r.Context(), request.Email, request.Password)
+					http.Error(w, "Invalid email or password", http.StatusUnauthorized)
 					return
 				}
 

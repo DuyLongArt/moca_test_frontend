@@ -182,7 +182,7 @@ export function LandingPage() {
       </main>
 
       {/* ── BOTTOM NAV (landing) ── */}
-      <nav className="fixed bottom-0 z-40 flex w-full items-center justify-around border-t border-outline-variant bg-surface px-2 py-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom,0px))] md:hidden">
+      <nav aria-label="Điều hướng chính" className="fixed bottom-0 z-40 flex w-full items-center justify-around border-t border-outline-variant bg-surface px-2 py-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom,0px))] md:hidden">
         <button
           type="button"
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
@@ -193,7 +193,7 @@ export function LandingPage() {
         </button>
         <button
           type="button"
-          onClick={openPhoneSheet}
+          onClick={goDoctor}
           className="flex flex-col items-center justify-center rounded-xl px-4 py-1.5 text-on-surface-variant"
         >
           <ClipboardList size={22} />
@@ -227,11 +227,13 @@ export function LandingPage() {
             onClick={() => setPhoneOpen(false)}
           />
           <form
+            role="dialog"
+            aria-labelledby="landing-sheet-title"
             onSubmit={(e) => { e.preventDefault(); handleContinue() }}
             className="relative w-full max-w-lg rounded-3xl border border-outline-variant bg-surface-container-lowest p-6 shadow-xl"
           >
-            <div className="mxb-4 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-on-surface">Định danh bệnh nhân</h3>
+            <div className="mb-4 flex items-center justify-between">
+              <h3 id="landing-sheet-title" className="text-xl font-bold text-on-surface">Định danh bệnh nhân</h3>
               <button
                 type="button"
                 onClick={() => setPhoneOpen(false)}
