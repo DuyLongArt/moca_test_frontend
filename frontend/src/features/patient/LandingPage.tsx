@@ -8,7 +8,7 @@ import {
   UserRound,
   X,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../stores/authStore'
 import { patientAuthStatus } from '../../features/auth/auth.api'
@@ -41,6 +41,7 @@ export function LandingPage() {
   const [fullName, setFullName] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const mainRef = useRef<HTMLElement>(null)
 
   const phoneCheck = validateVnPhone(phone)
   const phoneReady = phoneCheck.ok
@@ -136,7 +137,7 @@ export function LandingPage() {
       </header>
 
       {/* ── SCROLL BODY ── */}
-      <main className="app-shell__main overflow-y-auto pb-24">
+      <main ref={mainRef} className="app-shell__main overflow-y-auto pb-24">
         {/* Hero — flat, no nested card */}
         <section className="px-[var(--stitch-margin-mobile)] pt-8 pb-6">
           <h1 className="text-3xl font-bold leading-tight text-on-surface sm:text-4xl">
@@ -187,7 +188,7 @@ export function LandingPage() {
       <nav aria-label="Điều hướng chính" className="fixed bottom-0 z-40 flex w-full items-center justify-around border-t border-outline-variant bg-surface px-2 py-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom,0px))] md:hidden">
         <button
           type="button"
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          onClick={() => mainRef.current?.scrollTo({ top: 0, behavior: 'smooth' })}
           className="flex flex-col items-center justify-center rounded-xl bg-primary/10 px-4 py-1.5 text-primary"
         >
           <Home size={22} />

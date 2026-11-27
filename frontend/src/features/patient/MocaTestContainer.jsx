@@ -1948,7 +1948,7 @@ export default function MocaTestContainer() {
     phone: authUser?.id ?? "",
     email: authUser?.email ?? "",
     patient_name: authUser?.fullName ?? "",
-    education_years: 11,
+    education_years: authUser?.educationYears ?? 11,
     selected_set_id: Object.keys(QUESTION_BANK)[0],
   });
   const [phase, setPhase] = useState("start");

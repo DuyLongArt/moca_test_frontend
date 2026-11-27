@@ -1,6 +1,4 @@
 import { useRef, useState } from 'react'
-import { jsPDF } from 'jspdf'
-import html2canvas from 'html2canvas-pro'
 import { AlertTriangle, CheckCircle2, FileDown } from 'lucide-react'
 import type { TestSessionSummary } from '../../shared/types/session'
 import { formatDateVi } from '../../shared/utils/format'
@@ -20,11 +18,13 @@ export function PatientResultsSummary({
 
   const rootRef = useRef<HTMLDivElement>(null)
   const [exporting, setExporting] = useState(false)
+  const [exportError, setExportError] = useState<string | null>(null)
 
   async function handleExportPdf() {
     const el = rootRef.current
     if (!el || exporting) return
     setExporting(true)
+    setExportError(null)
 
     // html2canvas-pro renders the glass cards' backdrop-filter: blur(12px),
     // which makes the whole PDF look soft. Disable it for the capture.
@@ -34,6 +34,11 @@ export function PatientResultsSummary({
     document.head.appendChild(noBackdrop)
 
     try {
+      const [{ jsPDF }, { default: html2canvas }] = await Promise.all([
+        import('jspdf'),
+        import('html2canvas-pro'),
+      ])
+
       // Target ~240 DPI at A4 print width so text stays crisp.
       const targetWidthPx = 1800
       const scale = Math.max(2, Math.ceil(targetWidthPx / Math.max(el.offsetWidth, 1)))
@@ -62,6 +67,8 @@ export function PatientResultsSummary({
         heightLeft -= printableHeight
       }
       pdf.save(`moca-ket-qua-${session.id}.pdf`)
+    } catch {
+      setExportError('Không xuất được PDF. Vui lòng thử lại.')
     } finally {
       document.head.removeChild(noBackdrop)
       setExporting(false)
@@ -145,6 +152,11 @@ export function PatientResultsSummary({
             <FileDown size={18} />
             {exporting ? 'Đang xuất…' : 'Xuất PDF'}
           </button>
+          {exportError && (
+            <p role="alert" className="mt-2 text-center text-sm font-medium text-error">
+              {exportError}
+            </p>
+          )}
         </section>
       )}
     </div>
