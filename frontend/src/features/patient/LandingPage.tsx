@@ -107,6 +107,11 @@ export function LandingPage() {
     else openPhoneSheet()
   }
 
+  const scrollToTop = () => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    mainRef.current?.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' })
+  }
+
   return (
     <div className="app-shell elderly-layout bg-background text-on-background">
       {/* ── HEADER ── */}
@@ -206,7 +211,7 @@ export function LandingPage() {
       <nav aria-label="Điều hướng chính" className="fixed bottom-0 z-40 flex w-full items-center justify-around border-t border-outline-variant bg-surface px-2 py-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom,0px))] md:hidden">
         <button
           type="button"
-          onClick={() => mainRef.current?.scrollTo({ top: 0, behavior: 'smooth' })}
+          onClick={scrollToTop}
           className="flex flex-col items-center justify-center rounded-xl bg-primary/10 px-4 py-1.5 text-primary"
         >
           <Home size={22} />

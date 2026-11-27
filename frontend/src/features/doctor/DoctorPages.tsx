@@ -13,7 +13,11 @@ const DOCTOR_NAV = [
 
 export function DoctorDashboardPage() {
   const { data: reviews = [], isLoading, error } = useDoctorReviews()
-  const { data: patients = [] } = useDoctorPatients()
+  const {
+    data: patients = [],
+    isLoading: patientsLoading,
+    error: patientsError,
+  } = useDoctorPatients()
 
   return (
     <AppShell title="Bác sĩ" nav={DOCTOR_NAV}>
@@ -24,7 +28,9 @@ export function DoctorDashboardPage() {
         </GlassCard>
         <GlassCard>
           <p className="text-sm text-slate-500">Bệnh nhân</p>
-          <p className="text-3xl font-bold text-blue-600">{patients.length}</p>
+          <p className="text-3xl font-bold text-blue-600">
+            {patientsLoading ? '…' : patientsError ? '—' : patients.length}
+          </p>
         </GlassCard>
       </div>
 

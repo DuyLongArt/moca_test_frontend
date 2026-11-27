@@ -1,5 +1,5 @@
 import { ArrowLeft, Brain, LogOut, Settings } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../../stores/authStore'
 
 const actionClass =
@@ -12,20 +12,25 @@ type Props = {
 export function MocaAppHeader({ title = 'Đánh giá MoCA' }: Props) {
   const logout = useAuthStore((s) => s.logout)
   const navigate = useNavigate()
+  const location = useLocation()
 
-const handleGoBack =()=>{
-  navigate(-1);
+  const handleGoBack = () => {
+    if (location.key === 'default') {
+      navigate('/patient', { replace: true })
+      return
+    }
+    navigate(-1)
+  }
 
-}
-
-
-const handleLogout = () => {
+  const handleLogout = () => {
     logout()
     navigate('/entry', { replace: true })
   }
-  const handleSettings=()=>{
+
+  const handleSettings = () => {
     navigate('/patient/settings')
   }
+
   return (
     <header className="sticky top-0 z-50 flex h-14 shrink-0 w-full items-center justify-between gap-3 border-b border-outline-variant bg-surface px-[var(--stitch-margin-mobile)]">
       <div className="flex min-w-0 items-center gap-3">
