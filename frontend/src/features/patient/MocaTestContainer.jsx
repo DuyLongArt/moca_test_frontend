@@ -107,13 +107,17 @@ function useSpeech(lang = "vi-VN") {
     loadVoices(); // some browsers have voices ready immediately
     // Chrome populates voices asynchronously and fires this event when ready.
     const synth = window.speechSynthesis;
-    synth.addEventListener
-      ? synth.addEventListener("voiceschanged", loadVoices)
-      : (synth.onvoiceschanged = loadVoices);
+    if (synth.addEventListener) {
+      synth.addEventListener("voiceschanged", loadVoices);
+    } else {
+      synth.onvoiceschanged = loadVoices;
+    }
     return () => {
-      synth.removeEventListener
-        ? synth.removeEventListener("voiceschanged", loadVoices)
-        : (synth.onvoiceschanged = null);
+      if (synth.removeEventListener) {
+        synth.removeEventListener("voiceschanged", loadVoices);
+      } else {
+        synth.onvoiceschanged = null;
+      }
     };
   }, [supported, loadVoices]);
 
