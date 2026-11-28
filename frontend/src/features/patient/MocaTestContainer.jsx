@@ -277,6 +277,7 @@ function TextFieldWithRecording({ value, onChange, placeholder, label, inputMode
         value={value}
         onChange={onChange}
         placeholder={placeholder}
+        aria-label={placeholder}
         className="flex-1"
       />
       <RecorderButton
@@ -889,6 +890,7 @@ function RecorderButton({ label, value, onSaved, onStart, compact = false, showP
             onClick={rec.stop}
             className="min-h-[42px] min-w-[42px] rounded-2xl bg-red-700 !text-white hover:bg-red-800 animate-pulse p-3"
             title="Dừng ghi"
+            aria-label="Dừng ghi"
           >
             <Square size={20} />
           </button>
@@ -1277,6 +1279,7 @@ function Section4Attention({ speech, answers, setAnswer, onNext, onBack, enterFr
                   onChange={(e) => setSerial(i, e.target.value)}
                   className="rounded-xl border-2 border-gray-200 py-3 text-center text-xl font-bold focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none"
                   placeholder={i === 0 ? "−7" : ""}
+                  aria-label={`Số thứ ${i + 1} sau khi trừ 7`}
                 />
               ))}
             </div>
@@ -1423,6 +1426,7 @@ function Section6Fluency({ set, speech, answers, setAnswer, onNext, onBack }) {
           onChange={(e) => setAnswer("section_6_text", e.target.value)}
           rows={4}
           placeholder={running ? `Ví dụ: ${letter}an, ${letter}úa, ...` : "Nhấn Bắt đầu để mở khung nhập"}
+          aria-label={`Danh sách từ bắt đầu bằng chữ ${letter}`}
           className="w-full rounded-2xl border-2 border-gray-200 px-4 py-4 text-lg focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none disabled:bg-gray-50"
         />
         {finished && (
@@ -1589,6 +1593,7 @@ function Section8Recall({ set, speech, answers, setAnswer, onNext, onBack, secti
                     value={cur.text}
                     onChange={(e) => setWord(i, { text: e.target.value, used_cue: cur.used_cue, recording: cur.recording })}
                     placeholder="Nhập từ bạn nhớ…"
+                    aria-label={`Từ bạn nhớ thứ ${i + 1}`}
                   />
                   <RecorderButton
                     label={`Ghi âm từ ${i + 1}`}

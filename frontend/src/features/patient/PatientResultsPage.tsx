@@ -40,7 +40,10 @@ export function PatientResultsPage() {
             key={f.id}
             type="button"
             aria-pressed={filter === f.id}
-            onClick={() => setFilter(f.id)}
+            onClick={() => {
+              setFilter(f.id)
+              setSelectedId(null)
+            }}
             className={[
               'rounded-full px-3 py-1 text-sm font-medium transition',
               filter === f.id

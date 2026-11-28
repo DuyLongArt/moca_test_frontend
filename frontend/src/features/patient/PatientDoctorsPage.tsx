@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { Mail, MapPin, Phone, Star } from 'lucide-react'
 import { MocaPatientLayout } from '../../shared/components/layout/MocaPatientLayout'
 import { QueryState } from '../../shared/components/QueryState'
@@ -9,6 +10,11 @@ export function PatientDoctorsPage() {
   const { data: doctors = [], isLoading, error } = useDoctorOptions()
   const pickClinician = usePickClinician()
   const pickingId = pickClinician.isPending ? pickClinician.variables : null
+  const statusRef = useRef<HTMLParagraphElement>(null)
+
+  useEffect(() => {
+    if (pickClinician.isSuccess) statusRef.current?.focus()
+  }, [pickClinician.isSuccess])
 
   return (
     <MocaPatientLayout title="Bác sĩ của tôi">
@@ -21,7 +27,7 @@ export function PatientDoctorsPage() {
         </p>
       )}
       {pickClinician.isSuccess && (
-        <p role="status" className="mb-3 text-sm text-primary">
+        <p ref={statusRef} tabIndex={-1} role="status" className="mb-3 text-sm text-primary">
           Đã cập nhật bác sĩ phụ trách.
         </p>
       )}
