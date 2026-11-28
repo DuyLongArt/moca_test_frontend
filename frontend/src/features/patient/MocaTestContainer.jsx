@@ -623,11 +623,15 @@ function Section2Naming({ set, speech, answers, setAnswer, onNext, onBack, enter
               loading="lazy"
             />
           </div>
-          <label className="block text-base font-bold text-gray-700 mb-2">
+          <label
+            htmlFor={`animal-name-${animal.id}`}
+            className="block text-base font-bold text-gray-700 mb-2"
+          >
             Tên con vật {i + 1}
           </label>
           <div className="space-y-3">
             <TextField
+              id={`animal-name-${animal.id}`}
               value={value[animal.id]?.text || ""}
               onChange={(e) => update(animal.id, e.target.value)}
               placeholder="Nhập tên con vật…"

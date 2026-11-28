@@ -1,6 +1,5 @@
-import { BarChart3, Home, LogOut, UserRound } from 'lucide-react'
-import { NavLink, useNavigate } from 'react-router-dom'
-import { useAuthStore } from '../../../stores/authStore'
+import { BarChart3, Home, UserRound } from 'lucide-react'
+import { NavLink } from 'react-router-dom'
 
 const NAV = [
   { to: '/patient', label: 'Trang chủ', icon: Home, end: true },
@@ -9,14 +8,6 @@ const NAV = [
 ] as const
 
 export function MocaBottomNav() {
-  const logout = useAuthStore((s) => s.logout)
-  const navigate = useNavigate()
-
-  const handleLogout = () => {
-    logout()
-    navigate('/entry', { replace: true })
-  }
-
   return (
     <nav
       aria-label="Điều hướng chính"
@@ -43,14 +34,6 @@ export function MocaBottomNav() {
         </NavLink>
         )
       })}
-      <button
-        type="button"
-        onClick={handleLogout}
-        className="flex flex-col items-center justify-center rounded-xl px-4 py-1 text-on-surface-variant transition-transform active:scale-90 hover:bg-surface-container-low"
-      >
-        <LogOut size={22} />
-        <span className="text-xs">Thoát</span>
-      </button>
     </nav>
   )
 }

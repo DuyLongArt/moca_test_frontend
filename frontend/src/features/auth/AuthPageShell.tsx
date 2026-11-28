@@ -11,7 +11,7 @@ export function AuthPageShell({ title, subtitle, children }: Props) {
   return (
     <div className="app-shell bg-background text-on-background">
       <header className="flex h-12 shrink-0 items-center justify-center border-b border-outline-variant/40 bg-surface px-[var(--stitch-margin-mobile)]">
-        <h1 className="text-lg font-semibold text-primary">Assessment Pro</h1>
+        <h1 className="text-lg font-semibold text-primary">MoCA Việt</h1>
       </header>
 
       <main className="app-shell__main app-shell__main--center px-[var(--stitch-margin-mobile)]">

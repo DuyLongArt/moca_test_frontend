@@ -321,7 +321,7 @@ export function DoctorReviewPage() {
   if (error || !session) {
     return (
       <AppShell title="Chấm điểm bài làm" nav={DOCTOR_NAV}>
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+        <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
           Không tải được dữ liệu:{' '}
           {getApiErrorMessage(error, 'Không tìm thấy phiên làm bài')}
         </div>
