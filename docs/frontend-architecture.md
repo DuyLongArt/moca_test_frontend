@@ -114,7 +114,7 @@ MocaTestContainer onComplete
 | Store | Persist? | Contents |
 |-------|----------|----------|
 | `authStore` | yes | `user`, `token`, `loginDev`, `logout` |
-| `uiStore` | no | `patientResultsFilter`, `doctorAiAssist` |
+| `uiStore` | no | `patientResultsFilter` |
 
 **Anti-pattern:** `sessions[]` in Zustand populated from `useEffect` — use Query instead.
 
@@ -137,9 +137,9 @@ VITE_DEV_BYPASS_AUTH=false    # true enables mock API + dev auth bypass
 ## Implementation slices (order)
 
 1. ✅ Architecture + queryKeys + api modules + hooks scaffold
-2. `POST /api/v1/test-sessions` + `useSubmitSession`
-3. Replace mocks on patient/doctor/admin lists
-4. JWT login replaces `loginDev`
+2. ✅ `POST /api/v1/test-sessions` + `useSubmitSession`
+3. ✅ Replace mocks on patient/doctor/admin lists
+4. ✅ JWT login replaces `loginDev`
 
 ---
 

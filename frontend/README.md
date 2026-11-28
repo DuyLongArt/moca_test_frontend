@@ -19,7 +19,7 @@ Open http://localhost:5173 — chọn vai trò trên màn đăng nhập demo.
 | Features | `src/features/{patient,doctor,admin,auth}/` |
 | Link (HTTP) | `src/shared/lib/axios.ts` |
 | Client state | `src/stores/authStore.ts` (Zustand) |
-| Server state | TanStack Query (hooks — slice tiếp) |
+| Server state | TanStack Query (`src/features/*/use*Queries.ts`) |
 | MoCA wizard | `src/features/patient/MocaTestContainer.jsx` |
 
 ## API proxy

@@ -1,5 +1,5 @@
 import { LogOut } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useAuthStore } from '../../stores/authStore'
 import type { BreadcrumbCrumb } from '../lib/breadcrumbs'
@@ -22,6 +22,10 @@ export function AppShell({
 }: Props) {
   const user = useAuthStore((s) => s.user)
   const logout = useAuthStore((s) => s.logout)
+
+  useEffect(() => {
+    document.title = `${title} | MoCA Việt`
+  }, [title])
 
   return (
     <div className="app-shell bg-[var(--stitch-background)]">

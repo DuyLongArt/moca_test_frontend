@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import type { BreadcrumbCrumb } from '../../lib/breadcrumbs'
 import { MocaAppHeader } from './MocaAppHeader'
 import { MocaBottomNav } from './MocaBottomNav'
@@ -19,6 +19,10 @@ export function MocaPatientLayout({
   breadcrumbs,
   fitViewport = false,
 }: Props) {
+  useEffect(() => {
+    document.title = title ? `${title} | MoCA Việt` : 'Đánh giá MoCA | MoCA Việt'
+  }, [title])
+
   return (
     <div className="app-shell elderly-layout bg-surface text-on-surface">
       <a

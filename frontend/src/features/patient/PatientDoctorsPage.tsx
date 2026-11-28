@@ -19,6 +19,11 @@ export function PatientDoctorsPage() {
           {getApiErrorMessage(pickClinician.error, 'Không chọn được bác sĩ. Vui lòng thử lại.')}
         </p>
       )}
+      {pickClinician.isSuccess && (
+        <p role="status" className="mb-3 text-sm text-primary">
+          Đã cập nhật bác sĩ phụ trách.
+        </p>
+      )}
       <QueryState
         isLoading={isLoading}
         error={error}
