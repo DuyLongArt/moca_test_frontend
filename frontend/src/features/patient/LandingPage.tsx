@@ -8,7 +8,7 @@ import {
   UserRound,
   X,
 } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../stores/authStore'
 import { patientAuthStatus } from '../../features/auth/auth.api'
@@ -42,13 +42,23 @@ export function LandingPage() {
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const mainRef = useRef<HTMLElement>(null)
+  const sheetTriggerRef = useRef<HTMLElement | null>(null)
 
   const phoneCheck = validateVnPhone(phone)
 
   const openPhoneSheet = () => {
+    if (document.activeElement instanceof HTMLElement) {
+      sheetTriggerRef.current = document.activeElement
+    }
     setPhoneOpen(true)
     setError(null)
   }
+
+  useEffect(() => {
+    if (phoneOpen || !sheetTriggerRef.current) return
+    sheetTriggerRef.current.focus()
+    sheetTriggerRef.current = null
+  }, [phoneOpen])
 
   const handleContinue = async () => {
     if (!phoneCheck.ok) {

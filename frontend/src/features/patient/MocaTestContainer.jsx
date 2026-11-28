@@ -1953,6 +1953,7 @@ export default function MocaTestContainer() {
   const authUser = useAuthStore((s) => s.user);
   const submitSession = useSubmitSession();
   const submitStarted = useRef(false);
+  const submitInFlight = useRef(false);
   const [submitStatus, setSubmitStatus] = useState("idle");
 
   const [profile, setProfile] = useState({
@@ -2001,6 +2002,8 @@ export default function MocaTestContainer() {
   };
 
   const doSubmit = useCallback(() => {
+    if (submitInFlight.current) return;
+    submitInFlight.current = true;
     setSubmitStatus("pending");
     submitSession.mutate(
       {
@@ -2011,6 +2014,9 @@ export default function MocaTestContainer() {
       {
         onSuccess: () => setSubmitStatus("success"),
         onError: () => setSubmitStatus("error"),
+        onSettled: () => {
+          submitInFlight.current = false;
+        },
       },
     );
   }, [profile.selected_set_id, profile.education_years, answers, submitSession]);
