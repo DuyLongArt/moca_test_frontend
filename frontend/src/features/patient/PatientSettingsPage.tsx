@@ -4,6 +4,7 @@ import {
 import { useState, type FormEvent } from 'react'
 import { useAuthStore } from '../../stores/authStore'
 import { MocaPatientLayout } from '../../shared/components/layout/MocaPatientLayout'
+import { getApiErrorMessage } from '../../shared/utils/apiError'
 import { formatDateVi } from '../../shared/utils/format'
 import { formatPhoneDisplay } from '../../shared/utils/phone'
 import { useUpdatePatientProfile } from './usePatientQueries'
@@ -59,8 +60,8 @@ export function PatientSettingsPage() {
         educationYears: educationYears ? Number(educationYears) : null,
       })
       setEditing(false)
-    } catch {
-      setError('Không lưu được thông tin. Thử lại sau.')
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'Không lưu được thông tin. Thử lại sau.'))
     }
   }
 

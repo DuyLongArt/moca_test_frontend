@@ -1626,9 +1626,9 @@ function Section9Orientation({ speech, answers, setAnswer, onNext, onBack }) {
   const days = ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chủ Nhật"];
 
   const fields = [
-    { k: "date", label: "Hôm nay là ngày mấy?", type: "number", placeholder: "Ngày (1–31)" },
-    { k: "month", label: "Tháng mấy?", type: "number", placeholder: "Tháng (1–12)" },
-    { k: "year", label: "Năm bao nhiêu?", type: "number", placeholder: "Năm" },
+    { k: "date", label: "Hôm nay là ngày mấy?", type: "number", placeholder: "Ngày (1–31)", min: 1, max: 31 },
+    { k: "month", label: "Tháng mấy?", type: "number", placeholder: "Tháng (1–12)", min: 1, max: 12 },
+    { k: "year", label: "Năm bao nhiêu?", type: "number", placeholder: "Năm", min: 1900, max: new Date().getFullYear() },
     { k: "place", label: "Đây là nơi nào? (bệnh viện / phòng khám)", type: "text", placeholder: "Tên địa điểm" },
     { k: "city", label: "Thành phố / tỉnh nào?", type: "text", placeholder: "Tên thành phố" },
   ];
@@ -1650,6 +1650,7 @@ function Section9Orientation({ speech, answers, setAnswer, onNext, onBack }) {
                   key={d}
                   type="button"
                   onClick={() => set("day", d)}
+                  aria-pressed={v.day === d}
                   className={
                     "rounded-xl py-3 font-semibold border-2 " +
                     (v.day === d
@@ -1664,11 +1665,14 @@ function Section9Orientation({ speech, answers, setAnswer, onNext, onBack }) {
           </div>
           {fields.map((f) => (
             <div key={f.k}>
-              <label className="block text-base font-semibold text-gray-700 mb-2">{f.label}</label>
+              <label htmlFor={`orientation-${f.k}`} className="block text-base font-semibold text-gray-700 mb-2">{f.label}</label>
               <div className="flex gap-2">
                 <TextField
+                  id={`orientation-${f.k}`}
                   type={f.type}
                   inputMode={f.type === "number" ? "numeric" : "text"}
+                  min={f.min}
+                  max={f.max}
                   value={v[f.k] || ""}
                   onChange={(e) => set(f.k, e.target.value)}
                   placeholder={f.placeholder}

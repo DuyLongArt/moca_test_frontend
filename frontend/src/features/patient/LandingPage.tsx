@@ -8,7 +8,12 @@ import {
   UserRound,
   X,
 } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import {
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../stores/authStore'
 import { patientAuthStatus } from '../../features/auth/auth.api'
@@ -43,6 +48,9 @@ export function LandingPage() {
   const [submitting, setSubmitting] = useState(false)
   const mainRef = useRef<HTMLElement>(null)
   const sheetTriggerRef = useRef<HTMLElement | null>(null)
+  const sheetRef = useRef<HTMLFormElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
 
   const phoneCheck = validateVnPhone(phone)
 
@@ -59,6 +67,31 @@ export function LandingPage() {
     sheetTriggerRef.current.focus()
     sheetTriggerRef.current = null
   }, [phoneOpen])
+
+  useEffect(() => {
+    if (!menuOpen) return
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      const target = event.target
+      if (
+        target instanceof Node &&
+        !menuRef.current?.contains(target) &&
+        !menuButtonRef.current?.contains(target)
+      ) {
+        setMenuOpen(false)
+      }
+    }
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      setMenuOpen(false)
+      menuButtonRef.current?.focus()
+    }
+    document.addEventListener('pointerdown', closeOnOutsidePointer)
+    document.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsidePointer)
+      document.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [menuOpen])
 
   const handleContinue = async () => {
     if (!phoneCheck.ok) {
@@ -122,6 +155,29 @@ export function LandingPage() {
     mainRef.current?.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' })
   }
 
+  const handleSheetKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Escape') {
+      setPhoneOpen(false)
+      return
+    }
+    if (e.key !== 'Tab' || !sheetRef.current) return
+    const focusable = Array.from(
+      sheetRef.current.querySelectorAll<HTMLElement>(
+        'input:not([disabled]), button:not([disabled]), a[href]',
+      ),
+    )
+    const first = focusable[0]
+    const last = focusable[focusable.length - 1]
+    if (!first || !last) return
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault()
+      last.focus()
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault()
+      first.focus()
+    }
+  }
+
   return (
     <div className="app-shell elderly-layout bg-background text-on-background">
       {/* ── HEADER ── */}
@@ -136,19 +192,22 @@ export function LandingPage() {
           className="h-20 w-auto object-contain"
         />
         <button
+          ref={menuButtonRef}
           type="button"
           onClick={() => setMenuOpen((v) => !v)}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') setMenuOpen(false)
-          }}
           className="flex h-10 w-10 items-center justify-center rounded-xl text-on-surface-variant hover:bg-surface-container-low"
           aria-label="Menu"
           aria-expanded={menuOpen}
+          aria-controls="landing-menu"
         >
           {menuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
         {menuOpen && (
-          <div className="absolute right-[var(--stitch-margin-mobile)] top-full mt-1 w-52 rounded-xl border border-outline-variant bg-surface-container-lowest py-2 shadow-lg">
+          <div
+            id="landing-menu"
+            ref={menuRef}
+            className="absolute right-[var(--stitch-margin-mobile)] top-full mt-1 w-52 rounded-xl border border-outline-variant bg-surface-container-lowest py-2 shadow-lg"
+          >
             <button
               type="button"
               onClick={() => { setMenuOpen(false); navigate('/login') }}
@@ -257,17 +316,17 @@ export function LandingPage() {
       {phoneOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-[var(--stitch-margin-mobile)]"
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') setPhoneOpen(false)
-          }}
+          onKeyDown={handleSheetKeyDown}
         >
           <button
             type="button"
             className="absolute inset-0"
             aria-label="Đóng"
+            tabIndex={-1}
             onClick={() => setPhoneOpen(false)}
           />
           <form
+            ref={sheetRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="landing-sheet-title"

@@ -2,6 +2,7 @@ import { Mail, MapPin, Phone, Star } from 'lucide-react'
 import { MocaPatientLayout } from '../../shared/components/layout/MocaPatientLayout'
 import { QueryState } from '../../shared/components/QueryState'
 import { getApiErrorMessage } from '../../shared/utils/apiError'
+import { formatPhoneDisplay, normalizePhone, phoneDigitCount } from '../../shared/utils/phone'
 import { useDoctorOptions, usePickClinician } from './usePatientQueries'
 
 export function PatientDoctorsPage() {
@@ -73,10 +74,15 @@ export function PatientDoctorsPage() {
                     <span>Kinh nghiệm: {d.experience}</span>
                   </div>
                 )}
-                {d.phone && (
+                {d.phone && phoneDigitCount(d.phone) > 0 && (
                   <div className="flex items-center gap-2 text-on-surface-variant">
                     <Phone size={14} className="shrink-0" />
-                    <span>{d.phone}</span>
+                    <a
+                      href={`tel:${normalizePhone(d.phone)}`}
+                      className="!min-h-0 py-0 text-sm leading-none text-primary hover:underline break-all"
+                    >
+                      {formatPhoneDisplay(d.phone)}
+                    </a>
                   </div>
                 )}
                 {d.email && (
